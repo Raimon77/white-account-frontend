@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import AppLayout from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/auth/LoginPage";
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+
 import ClientsPage from "@/pages/clients/ClientsPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import PaymentsPage from "@/pages/payments/PaymentsPage";
@@ -68,6 +70,7 @@ function App() {
         />
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route
           element={

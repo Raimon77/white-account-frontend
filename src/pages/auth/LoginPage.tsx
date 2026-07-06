@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+
 
 import api from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -115,6 +116,9 @@ function LoginPage() {
                 <label className="text-sm font-semibold text-slate-700">
                   Mot de passe
                 </label>
+                <Link to="/forgot-password" className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                  Mot de passe oublié ?
+                </Link>
               </div>
               <input
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 hover:bg-slate-50 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"

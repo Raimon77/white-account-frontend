@@ -49,7 +49,7 @@ function SettingsPage() {
   const [saving, setSaving] = useState(false);
 
   // Password state
-  const [pwdData, setPwdData] = useState({ current_password: "", new_password: "" });
+  const [pwdData, setPwdData] = useState({ current_password: "", new_password: "", confirm_password: "" });
   const [savingPwd, setSavingPwd] = useState(false);
 
   useEffect(() => {
@@ -91,14 +91,24 @@ function SettingsPage() {
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
+    
+    if (pwdData.new_password !== pwdData.confirm_password) {
+      setErrorMsg("Les nouveaux mots de passe ne correspondent pas.");
+      setTimeout(() => setErrorMsg(""), 4000);
+      return;
+    }
+
     setSavingPwd(true);
     setSuccessMsg("");
     setErrorMsg("");
 
     try {
-      await api.patch("/auth/me/password", pwdData);
+      await api.patch("/auth/me/password", {
+        current_password: pwdData.current_password,
+        new_password: pwdData.new_password
+      });
       setSuccessMsg("Votre mot de passe a été modifié avec succès !");
-      setPwdData({ current_password: "", new_password: "" });
+      setPwdData({ current_password: "", new_password: "", confirm_password: "" });
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch (error: any) {
       setErrorMsg(error.response?.data?.message || "Erreur lors du changement de mot de passe.");
@@ -237,6 +247,10 @@ function SettingsPage() {
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-700">Nouveau mot de passe</label>
                         <input type="password" minLength={8} required className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={pwdData.new_password} onChange={e => setPwdData({...pwdData, new_password: e.target.value})} />
+                      </div>
+                      <div className="space-y-1 sm:col-span-2">
+                        <label className="text-xs font-semibold text-slate-700">Confirmer le nouveau mot de passe</label>
+                        <input type="password" minLength={8} required className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={pwdData.confirm_password} onChange={e => setPwdData({...pwdData, confirm_password: e.target.value})} />
                       </div>
                     </div>
                     <div className="flex justify-end pt-2">

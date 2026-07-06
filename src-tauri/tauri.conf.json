@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "White Account",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "identifier": "com.REMOVED_TAURI_SIGNING_PASSWORD.desktop",
   "build": {
     "frontendDist": "../dist",
@@ -37,5 +37,12 @@
       "debugApplicationIdSuffix": ".debug"
     }
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Raimon77/white-account-frontend/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIzNEJGNDk5ODkwNzc1QjgKUldTNGRRZUptZlJMSTVWd1pzOGR1czdhVTg2Z2dJVk9UQUEvU2FhdGp2VXBERGdDY1JheXNkNEwK"
+    }
+  }
 }

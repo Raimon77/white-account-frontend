@@ -57,6 +57,11 @@ function LoginPage() {
           "white_account_user",
           JSON.stringify(response.data.user)
         );
+        if (response.data.user.role === "admin") {
+          document.body.classList.add("role-admin");
+        } else {
+          document.body.classList.remove("role-admin");
+        }
       }
 
       navigate("/dashboard");

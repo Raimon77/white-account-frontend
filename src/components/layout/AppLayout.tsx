@@ -110,6 +110,7 @@ function AppLayout() {
   function logout() {
     localStorage.removeItem("white_account_token");
     localStorage.removeItem("white_account_user");
+    document.body.classList.remove("role-admin");
     navigate("/login");
   }
 

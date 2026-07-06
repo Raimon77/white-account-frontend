@@ -207,13 +207,26 @@ function DashboardPage() {
 
           <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              <div 
+                className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 cursor-pointer hover:bg-blue-100 transition-colors"
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input');
+                  if (input && 'showPicker' in input) {
+                    try {
+                      input.showPicker();
+                    } catch (err) {
+                      // fallback for older browsers
+                    }
+                  }
+                }}
+              >
                 Période: 
                 <input 
                   type="month" 
                   value={periodKey}
                   onChange={(e) => setPeriodKey(e.target.value)}
                   className="bg-transparent border-none outline-none text-blue-800 font-bold cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
 

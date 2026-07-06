@@ -62,28 +62,50 @@ function SettingsPage() {
       console.error(e);
     }
 
-    try {
-      const boutiqueRaw = localStorage.getItem("white_account_boutique");
-      if (boutiqueRaw) {
-        setBoutique(JSON.parse(boutiqueRaw) as BoutiqueConfig);
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data) {
+          const newBoutique = {
+            name: data.name || "",
+            address: data.address || "",
+            phone: data.phone || "",
+            email: data.email || "",
+            currency: data.currency || "FCFA",
+            taxNumber: data.taxNumber || ""
+          };
+          setBoutique(newBoutique);
+          localStorage.setItem("white_account_boutique", JSON.stringify(newBoutique));
+        }
+      } catch (e) {
+        console.error("Could not fetch settings from server", e);
+        try {
+          const boutiqueRaw = localStorage.getItem("white_account_boutique");
+          if (boutiqueRaw) {
+            setBoutique(JSON.parse(boutiqueRaw) as BoutiqueConfig);
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }
-    } catch (e) {
-      console.error(e);
-    }
+    };
+    
+    fetchSettings();
   }, []);
 
-  function handleSaveBoutique(e: React.FormEvent) {
+  async function handleSaveBoutique(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSuccessMsg("");
     setErrorMsg("");
 
     try {
+      await api.put('/settings', boutique);
       localStorage.setItem("white_account_boutique", JSON.stringify(boutique));
       setSuccessMsg("Paramètres de la boutique enregistrés avec succès !");
       setTimeout(() => setSuccessMsg(""), 3000);
-    } catch {
-      setErrorMsg("Impossible de sauvegarder localement les paramètres.");
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || "Erreur lors de la sauvegarde sur le serveur.");
     } finally {
       setSaving(false);
     }

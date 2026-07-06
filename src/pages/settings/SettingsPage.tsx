@@ -12,8 +12,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/api/api";
+import UsersSettings from "./UsersSettings";
 
 type UserProfile = {
+  id?: string;
   full_name?: string;
   email?: string;
   role?: string;
@@ -38,15 +41,18 @@ const DEFAULT_BOUTIQUE: BoutiqueConfig = {
 };
 
 function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"profile" | "boutique">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "boutique" | "team">("profile");
   const [user, setUser] = useState<UserProfile | null>(null);
   const [boutique, setBoutique] = useState<BoutiqueConfig>(DEFAULT_BOUTIQUE);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Password state
+  const [pwdData, setPwdData] = useState({ current_password: "", new_password: "" });
+  const [savingPwd, setSavingPwd] = useState(false);
+
   useEffect(() => {
-    // Load logged-in user
     try {
       const userRaw = localStorage.getItem("white_account_user");
       if (userRaw) {
@@ -56,7 +62,6 @@ function SettingsPage() {
       console.error(e);
     }
 
-    // Load boutique config from localStorage if exists
     try {
       const boutiqueRaw = localStorage.getItem("white_account_boutique");
       if (boutiqueRaw) {
@@ -84,9 +89,27 @@ function SettingsPage() {
     }
   }
 
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingPwd(true);
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    try {
+      await api.patch("/auth/me/password", pwdData);
+      setSuccessMsg("Votre mot de passe a été modifié avec succès !");
+      setPwdData({ current_password: "", new_password: "" });
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (error: any) {
+      setErrorMsg(error.response?.data?.message || "Erreur lors du changement de mot de passe.");
+      setTimeout(() => setErrorMsg(""), 4000);
+    } finally {
+      setSavingPwd(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold text-slate-900">Paramètres</h2>
         <p className="mt-1 text-slate-500">
@@ -106,7 +129,6 @@ function SettingsPage() {
         </div>
       )}
 
-      {/* Settings Navigation Tabs */}
       <div className="flex border-b border-slate-200 gap-6 text-sm">
         <button
           onClick={() => setActiveTab("profile")}
@@ -128,9 +150,20 @@ function SettingsPage() {
         >
           Informations Boutique
         </button>
+        {user?.role === "admin" && (
+          <button
+            onClick={() => setActiveTab("team")}
+            className={`pb-3 font-semibold transition flex items-center gap-1.5 ${
+              activeTab === "team"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Shield size={14} /> Mon Équipe
+          </button>
+        )}
       </div>
 
-      {/* Tabs Content */}
       <div className="grid gap-6">
         {activeTab === "profile" && (
           <div className="grid gap-6 md:grid-cols-3">
@@ -145,48 +178,81 @@ function SettingsPage() {
               </div>
             </Card>
 
-            <Card className="bg-white border shadow-sm rounded-2xl md:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-base font-bold text-slate-900">
-                  Détails du compte
-                </CardTitle>
-                <CardDescription>
-                  Vos informations de connexion et habilitations système.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 text-sm">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-slate-400 text-xs flex items-center gap-1">
-                      <User size={13} /> Nom complet
-                    </p>
-                    <p className="font-semibold text-slate-800">{user?.full_name || "-"}</p>
-                  </div>
+            <div className="md:col-span-2 space-y-6">
+              <Card className="bg-white border shadow-sm rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-base font-bold text-slate-900">
+                    Détails du compte
+                  </CardTitle>
+                  <CardDescription>
+                    Vos informations de connexion et habilitations système.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2 text-sm">
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <User size={13} /> Nom complet
+                      </p>
+                      <p className="font-semibold text-slate-800">{user?.full_name || "-"}</p>
+                    </div>
 
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-slate-400 text-xs flex items-center gap-1">
-                      <Mail size={13} /> Adresse Email
-                    </p>
-                    <p className="font-semibold text-slate-800">{user?.email || "-"}</p>
-                  </div>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <Mail size={13} /> Adresse Email
+                      </p>
+                      <p className="font-semibold text-slate-800">{user?.email || "-"}</p>
+                    </div>
 
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-slate-400 text-xs flex items-center gap-1">
-                      <Shield size={13} /> Rôle d'accès
-                    </p>
-                    <p className="font-bold text-blue-700 capitalize">{user?.role || "-"}</p>
-                  </div>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <Shield size={13} /> Rôle d'accès
+                      </p>
+                      <p className="font-bold text-blue-700 capitalize">{user?.role || "-"}</p>
+                    </div>
 
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-slate-400 text-xs flex items-center gap-1">
-                      <Lock size={13} /> Sécurité
-                    </p>
-                    <p className="font-semibold text-slate-800">Authentification JWT</p>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        <Lock size={13} /> Sécurité
+                      </p>
+                      <p className="font-semibold text-slate-800">Authentification JWT</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white border shadow-sm rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-base font-bold text-slate-900">
+                    Changer de mot de passe
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Mot de passe actuel</label>
+                        <input type="password" required className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={pwdData.current_password} onChange={e => setPwdData({...pwdData, current_password: e.target.value})} />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Nouveau mot de passe</label>
+                        <input type="password" minLength={8} required className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={pwdData.new_password} onChange={e => setPwdData({...pwdData, new_password: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="flex justify-end pt-2">
+                      <Button type="submit" disabled={savingPwd} className="bg-slate-900 hover:bg-slate-800 rounded-xl">
+                        Mettre à jour le mot de passe
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
           </div>
+        )}
+
+        {activeTab === "team" && user?.role === "admin" && (
+          <UsersSettings />
         )}
 
         {activeTab === "boutique" && (

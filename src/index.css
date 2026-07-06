@@ -141,3 +141,16 @@ body {
     @apply font-sans;
   }
 }
+body:not(.role-admin) .admin-only {
+  display: none !important;
+}
+
+.bg-mesh {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(217, 100%, 94%, 1) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(213, 100%, 96%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(217, 100%, 94%, 1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(214, 100%, 97%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(217, 100%, 92%, 1) 0px, transparent 50%);
+}

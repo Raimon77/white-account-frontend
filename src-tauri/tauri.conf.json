@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "White Account",
+  "version": "0.1.1",
+  "identifier": "com.REMOVED_TAURI_SIGNING_PASSWORD.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "White Account",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIzNEJGNDk5ODkwNzc1QjgKUldTNGRRZUptZlJMSTVWd1pzOGR1czdhVTg2Z2dJVk9UQUEvU2FhdGp2VXBERGdDY1JheXNkNEwK",
+      "endpoints": [
+        "https://github.com/Raimon77/white-account-frontend/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

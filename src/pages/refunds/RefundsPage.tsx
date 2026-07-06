@@ -9,6 +9,7 @@ import {
   Plus,
   RefreshCcw,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -235,6 +236,7 @@ function RefundsPage() {
   const [saleLoading, setSaleLoading] = useState(false);
   const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
   const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -443,6 +445,21 @@ function RefundsPage() {
     }
   }
 
+  async function handleDeleteRefund(id: string) {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet avoir ? Attention : si l'avoir retournait des articles en stock, ces articles seront retirés du stock.")) return;
+
+    try {
+      setDeletingId(id);
+      setError("");
+      await api.delete(`/sale-refunds/${id}`);
+      await loadData();
+    } catch (error) {
+      setError(getErrorMessage(error, "Erreur lors de la suppression de l'avoir."));
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -599,7 +616,7 @@ function RefundsPage() {
                           </span>
                         </td>
                         <td className="p-4 text-slate-500 max-w-xs truncate">{refund.reason || "-"}</td>
-                        <td className="p-4 text-right font-bold text-red-600">
+                        <td className="p-4 text-right font-bold text-red-600 admin-only">
                           -{formatMoney(refund.amount)}
                         </td>
                         <td className="p-4 text-right">
@@ -627,6 +644,19 @@ function RefundsPage() {
                                 <Loader2 size={16} className="animate-spin" />
                               ) : (
                                 <Download size={16} />
+                              )}
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDeleteRefund(refund.id)}
+                              disabled={deletingId === refund.id}
+                              className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
+                            >
+                              {deletingId === refund.id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={16} />
                               )}
                             </Button>
                           </div>
@@ -667,7 +697,7 @@ function RefundsPage() {
                       {refund.reason && (
                         <p className="text-slate-500 text-xs italic">Motif : {refund.reason}</p>
                       )}
-                      <p className="font-bold text-red-600">
+                      <p className="font-bold text-red-600 admin-only">
                         Montant : -{formatMoney(refund.amount)}
                       </p>
                     </div>
@@ -687,6 +717,15 @@ function RefundsPage() {
                         className="py-1.5 px-2.5 text-xs rounded-lg border border-blue-100 bg-white text-blue-600"
                       >
                         PDF
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteRefund(refund.id)}
+                        disabled={deletingId === refund.id}
+                        className="py-1.5 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600 admin-only"
+                      >
+                        {deletingId === refund.id ? "..." : "Supprimer"}
                       </Button>
                     </div>
                   </div>
@@ -775,7 +814,7 @@ function RefundsPage() {
                         <td className="p-3 font-medium text-slate-900">{item.product_name}</td>
                         <td className="p-3 text-center">{item.quantity}</td>
                         <td className="p-3 text-right">{formatMoney(item.unit_price)}</td>
-                        <td className="p-3 text-right font-bold text-red-600">
+                        <td className="p-3 text-right font-bold text-red-600 admin-only">
                           -{formatMoney(item.total_price)}
                         </td>
                       </tr>
@@ -919,7 +958,7 @@ function RefundsPage() {
                         type="checkbox"
                         checked={line.selected}
                         onChange={() => handleItemToggle(index)}
-                        className="h-4 w-4 text-red-600 border-slate-300 rounded focus:ring-red-500"
+                        className="h-4 w-4 text-red-600 border-slate-300 rounded focus:ring-red-500 admin-only"
                       />
 
                       <div className="flex-1 min-w-0">
@@ -956,7 +995,7 @@ function RefundsPage() {
 
                       <div className="w-28 space-y-1 text-right">
                         <p className="text-[9px] font-semibold text-slate-400 uppercase">Sous-total</p>
-                        <p className="py-1 px-2 text-xs font-bold text-red-600 bg-red-50 rounded-lg">
+                        <p className="py-1 px-2 text-xs font-bold text-red-600 bg-red-50 rounded-lg admin-only">
                           -{formatMoney(line.selected ? Number(line.quantity || 0) * Number(line.unit_price || 0) : 0)}
                         </p>
                       </div>
@@ -981,7 +1020,7 @@ function RefundsPage() {
 
               <div className="flex flex-col justify-end items-end p-4 bg-red-50/50 rounded-xl border border-red-100/50 space-y-1">
                 <p className="text-xs text-red-500">Montant total de l'avoir</p>
-                <p className="text-2xl font-bold text-red-600">-{formatMoney(formTotal)}</p>
+                <p className="text-2xl font-bold text-red-600 admin-only">-{formatMoney(formTotal)}</p>
               </div>
             </div>
 

@@ -378,7 +378,7 @@ function ExpensesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600 flex items-center gap-1.5">
+            <div className="text-2xl font-bold text-red-600 flex items-center gap-1.5 admin-only">
               <Wallet className="h-5 w-5 text-red-500" />
               {formatMoney(totalPeriodExpenses)}
             </div>
@@ -537,7 +537,7 @@ function ExpensesPage() {
                               {expense.reference && <p className="text-[10px] text-slate-400 font-mono mt-0.5">Réf: {expense.reference}</p>}
                             </div>
                           </td>
-                          <td className="p-4 text-right font-bold text-red-600">
+                          <td className="p-4 text-right font-bold text-red-600 admin-only">
                             -{formatMoney(expense.amount)}
                           </td>
                           <td className="p-4 text-right">
@@ -554,7 +554,7 @@ function ExpensesPage() {
                                 variant="outline"
                                 onClick={() => handleDeleteExpense(expense.id)}
                                 disabled={deletingId === expense.id}
-                                className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100"
+                                className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
                               >
                                 {deletingId === expense.id ? (
                                   <Loader2 size={16} className="animate-spin" />
@@ -586,7 +586,7 @@ function ExpensesPage() {
                           {expense.reference && ` (${expense.reference})`}
                         </p>
                         {expense.note && <p className="text-xs italic text-slate-400">"{expense.note}"</p>}
-                        <p className="font-bold text-red-600 text-base pt-1">
+                        <p className="font-bold text-red-600 text-base pt-1 admin-only">
                           -{formatMoney(expense.amount)}
                         </p>
                       </div>
@@ -602,7 +602,7 @@ function ExpensesPage() {
                         <Button
                           variant="outline"
                           onClick={() => handleDeleteExpense(expense.id)}
-                          className="py-1 px-2 text-xs rounded-lg border border-red-100 text-red-600 bg-white"
+                          className="py-1 px-2 text-xs rounded-lg border border-red-100 text-red-600 bg-white admin-only"
                         >
                           Supprimer
                         </Button>
@@ -693,7 +693,7 @@ function ExpensesPage() {
                     onChange={(e) =>
                       setFormData((p) => ({ ...p, amount: e.target.value }))
                     }
-                    className="w-full border rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-red-600"
+                    className="w-full border rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-red-600 admin-only"
                   />
                 </div>
 

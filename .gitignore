@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Tauri and Secrets
+updater.key
+updater.key.pub
+.env.production

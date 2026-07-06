@@ -182,7 +182,7 @@ function DashboardPage() {
           <CardTitle>Erreur</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-600">
+          <p className="text-red-600 admin-only">
             {error || "Impossible de lire les données du dashboard."}
           </p>
         </CardContent>

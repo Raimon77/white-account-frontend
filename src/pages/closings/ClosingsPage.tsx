@@ -10,6 +10,7 @@ import {
   Plus,
   RefreshCcw,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -117,6 +118,7 @@ function ClosingsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -230,6 +232,21 @@ function ClosingsPage() {
       setError(getErrorMessage(error, "Erreur lors de la clôture comptable."));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteClosing(period_key: string) {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer la clôture du mois ${period_key} ?\n\nATTENTION : Cette action va restaurer toutes les quantités en stock qui avaient été mises à zéro lors de cette clôture.`)) return;
+
+    try {
+      setDeletingId(period_key);
+      setError("");
+      await api.delete(`/closings/${period_key}`);
+      await loadData();
+    } catch (error) {
+      setError(getErrorMessage(error, "Erreur lors de la suppression de la clôture."));
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -385,13 +402,28 @@ function ClosingsPage() {
                         </td>
                         <td className="p-4 text-slate-500 text-xs">{closing.closed_by_name || "Admin"}</td>
                         <td className="p-4 text-right">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleOpenDetails(closing)}
-                            className="p-2 h-9 w-9 rounded-lg border bg-white text-slate-700 hover:bg-slate-50"
-                          >
-                            <Eye size={16} />
-                          </Button>
+                          <div className="flex justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleOpenDetails(closing)}
+                              className="p-2 h-9 w-9 rounded-lg border bg-white text-slate-700 hover:bg-slate-50"
+                            >
+                              <Eye size={16} />
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDeleteClosing(closing.period_key)}
+                              disabled={deletingId === closing.period_key}
+                              className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
+                            >
+                              {deletingId === closing.period_key ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -428,6 +460,15 @@ function ClosingsPage() {
                         className="py-1 px-2.5 text-xs rounded-lg border bg-white"
                       >
                         Voir détails
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteClosing(closing.period_key)}
+                        disabled={deletingId === closing.period_key}
+                        className="py-1 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600 admin-only"
+                      >
+                        {deletingId === closing.period_key ? "..." : "Supprimer"}
                       </Button>
                     </div>
                   </div>

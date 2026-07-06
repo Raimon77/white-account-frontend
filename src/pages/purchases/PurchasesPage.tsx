@@ -633,7 +633,7 @@ function PurchasesPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700"
+                              className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700 admin-only"
                               onClick={() => handleDelete(purchase)}
                               disabled={deletingId === purchase.id}
                             >
@@ -705,7 +705,7 @@ function PurchasesPage() {
 
                       <Button
                         variant="outline"
-                        className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700"
+                        className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700 admin-only"
                         onClick={() => handleDelete(purchase)}
                         disabled={deletingId === purchase.id}
                       >

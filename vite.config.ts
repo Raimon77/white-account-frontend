@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  clearScreen: false,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -12,5 +13,10 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: true,
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
   },
+  envPrefix: ['VITE_', 'TAURI_ENV_*'],
 });

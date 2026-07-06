@@ -857,7 +857,7 @@ function OrdersPage() {
                                   variant="outline"
                                   onClick={() => handleDeleteOrder(order.id)}
                                   disabled={deletingId === order.id}
-                                  className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100"
+                                  className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
                                 >
                                   {deletingId === order.id ? (
                                     <Loader2 size={16} className="animate-spin" />
@@ -939,7 +939,7 @@ function OrdersPage() {
                           <Button
                             variant="outline"
                             onClick={() => handleDeleteOrder(order.id)}
-                            className="py-1.5 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600"
+                            className="py-1.5 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600 admin-only"
                           >
                             Supprimer
                           </Button>
@@ -1102,7 +1102,7 @@ function OrdersPage() {
                       variant="outline"
                       onClick={() => handleUpdateStatus(selectedDetails.order.id, "cancelled")}
                       disabled={statusUpdatingId === selectedDetails.order.id}
-                      className="border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-semibold py-1.5 px-3 rounded-xl flex items-center gap-1.5"
+                      className="border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-semibold py-1.5 px-3 rounded-xl flex items-center gap-1.5 admin-only"
                     >
                       Annuler la commande
                     </Button>
@@ -1452,7 +1452,7 @@ function OrdersPage() {
                       type="button"
                       disabled={formData.items.length <= 1}
                       onClick={() => handleRemoveLine(index)}
-                      className="p-2 border rounded-lg hover:bg-red-50 hover:text-red-600 disabled:opacity-30 text-slate-400"
+                      className="p-2 border rounded-lg hover:bg-red-50 hover:text-red-600 disabled:opacity-30 text-slate-400 admin-only"
                     >
                       <Trash2 size={14} />
                     </button>

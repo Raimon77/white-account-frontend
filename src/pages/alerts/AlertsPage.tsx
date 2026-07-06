@@ -177,7 +177,7 @@ export default function AlertsPage() {
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-200 flex items-center gap-3">
+        <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-200 flex items-center gap-3 admin-only">
           <AlertTriangle size={18} />
           {error}
         </div>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { open } from '@tauri-apps/plugin-shell';
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Check,
@@ -562,7 +563,7 @@ function QuotesPage() {
       const url = getPdfDownloadUrl(response.data);
 
       if (url) {
-        window.open(buildBackendFileUrl(url), "_blank");
+        open(buildBackendFileUrl(url));
       } else {
         setError("L'URL du PDF n'a pas été retournée par le serveur.");
       }

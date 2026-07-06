@@ -1,4 +1,5 @@
 import axios from "axios";
+import { open } from '@tauri-apps/plugin-shell';
 import {
   useEffect,
   useMemo,
@@ -665,7 +666,7 @@ function SalesPage() {
         );
       }
 
-      window.open(buildBackendFileUrl(downloadUrl), "_blank", "noopener,noreferrer");
+      open(buildBackendFileUrl(downloadUrl));
       await loadData();
     } catch (error) {
       setError(getErrorMessage(error, "Impossible de générer la facture PDF."));

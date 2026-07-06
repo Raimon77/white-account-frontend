@@ -101,6 +101,10 @@ function formatDate(dateValue?: string) {
 }
 
 function DashboardPage() {
+  const [periodKey, setPeriodKey] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -110,9 +114,8 @@ function DashboardPage() {
       setLoading(true);
       setError("");
 
-      const currentPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       const response = await api.get<DashboardResponse>(
-        `/dashboard/summary?period_key=${currentPeriod}`
+        `/dashboard/summary?period_key=${periodKey}`
       );
 
       setDashboard(response.data);
@@ -125,7 +128,7 @@ function DashboardPage() {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [periodKey]);
 
   const summary = dashboard?.summary;
 
@@ -204,8 +207,14 @@ function DashboardPage() {
 
           <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <div className="mb-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                Période {dashboard?.period_key}
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                Période: 
+                <input 
+                  type="month" 
+                  value={periodKey}
+                  onChange={(e) => setPeriodKey(e.target.value)}
+                  className="bg-transparent border-none outline-none text-blue-800 font-bold cursor-pointer"
+                />
               </div>
 
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">

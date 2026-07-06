@@ -205,7 +205,11 @@ function getBackendMessage(data: unknown): string | null {
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (axios.isAxiosError(error)) {
-    return getBackendMessage(error.response?.data) || error.message || fallback;
+    const data = error.response?.data as any;
+    if (data?.error) {
+      return `${data.message || fallback} : ${data.error}`;
+    }
+    return data?.message || fallback;
   }
 
   if (error instanceof Error) {

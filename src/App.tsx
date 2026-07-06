@@ -28,32 +28,7 @@ function App() {
   const token = localStorage.getItem("white_account_token");
 
   useEffect(() => {
-    async function checkForUpdates() {
-      try {
-        const update = await check();
-        if (update) {
-          const yes = await ask(
-            `La version ${update.version} est disponible !\nVoulez-vous la télécharger et l'installer maintenant ?`,
-            { title: "Mise à jour disponible", kind: "info" }
-          );
-          if (yes) {
-            await update.downloadAndInstall((event) => {
-              console.log(event);
-            });
-            await message("Mise à jour installée. L'application va redémarrer.", { title: "Succès", kind: "info" });
-            // Tauri will automatically restart after installation
-          }
-        }
-      } catch (e) {
-        console.error("Erreur de mise à jour:", e);
-      }
-    }
-    
-    // Only check in production / desktop mode (check if window.__TAURI__ exists)
-    // @ts-ignore
-    if (window.__TAURI_INTERNALS__) {
-      checkForUpdates();
-    }
+    // Updater removed
   }, []);
 
   return (

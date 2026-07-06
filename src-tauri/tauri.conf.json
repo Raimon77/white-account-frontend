@@ -37,12 +37,5 @@
       "debugApplicationIdSuffix": ".debug"
     }
   },
-  "plugins": {
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIzNEJGNDk5ODkwNzc1QjgKUldTNGRRZUptZlJMSTVWd1pzOGR1czdhVTg2Z2dJVk9UQUEvU2FhdGp2VXBERGdDY1JheXNkNEwK",
-      "endpoints": [
-        "https://github.com/Raimon77/white-account-frontend/releases/latest/download/latest.json"
-      ]
-    }
-  }
+  "plugins": {}
 }

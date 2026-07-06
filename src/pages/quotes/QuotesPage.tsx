@@ -856,30 +856,28 @@ function QuotesPage() {
                             </Button>
 
                             {!quote.converted_sale_id && (
-                              <>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => handleOpenEdit(quote)}
-                                  disabled={detailsLoadingId === quote.id}
-                                  className="p-2 h-9 w-9 rounded-lg border bg-white text-slate-700 hover:bg-slate-50"
-                                >
-                                  <Edit size={16} />
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  onClick={() => handleDeleteQuote(quote.id)}
-                                  disabled={deletingId === quote.id}
-                                  className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
-                                >
-                                  {deletingId === quote.id ? (
-                                    <Loader2 size={16} className="animate-spin" />
-                                  ) : (
-                                    <Trash2 size={16} />
-                                  )}
-                                </Button>
-                              </>
+                              <Button
+                                variant="outline"
+                                onClick={() => handleOpenEdit(quote)}
+                                disabled={detailsLoadingId === quote.id}
+                                className="p-2 h-9 w-9 rounded-lg border bg-white text-slate-700 hover:bg-slate-50"
+                              >
+                                <Edit size={16} />
+                              </Button>
                             )}
+
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDeleteQuote(quote.id)}
+                              disabled={deletingId === quote.id}
+                              className="p-2 h-9 w-9 rounded-lg border bg-white text-red-600 hover:bg-red-50 border-red-100 admin-only"
+                            >
+                              {deletingId === quote.id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -942,24 +940,22 @@ function QuotesPage() {
                       </Button>
 
                       {!quote.converted_sale_id && (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() => handleOpenEdit(quote)}
-                            className="py-1.5 px-2.5 text-xs rounded-lg border bg-white"
-                          >
-                            Modifier
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            onClick={() => handleDeleteQuote(quote.id)}
-                            className="py-1.5 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600 admin-only"
-                          >
-                            Supprimer
-                          </Button>
-                        </>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleOpenEdit(quote)}
+                          className="py-1.5 px-2.5 text-xs rounded-lg border bg-white"
+                        >
+                          Modifier
+                        </Button>
                       )}
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteQuote(quote.id)}
+                        className="py-1.5 px-2.5 text-xs rounded-lg border border-red-100 bg-white text-red-600 admin-only"
+                      >
+                        Supprimer
+                      </Button>
                     </div>
                   </div>
                 ))}

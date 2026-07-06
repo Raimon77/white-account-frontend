@@ -50,6 +50,7 @@ function App() {
     }
     
     // Only check in production / desktop mode (check if window.__TAURI__ exists)
+    // @ts-ignore
     if (window.__TAURI_INTERNALS__) {
       checkForUpdates();
     }

@@ -19,6 +19,7 @@ import {
   ShoppingBag,
   ShoppingCart,
   Store,
+  Truck,
   Users,
   Wallet,
   X,
@@ -36,6 +37,11 @@ const menuItems = [
     title: "Clients",
     path: "/clients",
     icon: Users,
+  },
+  {
+    title: "Fournisseurs",
+    path: "/suppliers",
+    icon: Truck,
   },
   {
     title: "Produits",

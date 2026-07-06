@@ -5,6 +5,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 
 import ClientsPage from "@/pages/clients/ClientsPage";
+import SuppliersPage from "@/pages/suppliers/SuppliersPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import PaymentsPage from "@/pages/payments/PaymentsPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
@@ -58,6 +59,8 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
 
           <Route path="/clients" element={<ClientsPage />} />
+
+          <Route path="/suppliers" element={<SuppliersPage />} />
 
           <Route path="/products" element={<ProductsPage />} />
 

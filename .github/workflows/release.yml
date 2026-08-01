@@ -31,7 +31,11 @@ jobs:
       - name: Validate release version
         run: npm run release:check
 
+      - name: Validate public updater configuration
+        run: npm run updater:check
+
       - name: Build and Publish Tauri app
+        id: tauri
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,3 +47,72 @@ jobs:
           releaseBody: 'Voir les nouveautés dans cette mise à jour.'
           releaseDraft: false
           prerelease: false
+
+      - name: Prepare public updater files
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ steps.tauri.outputs.appVersion }}"
+          $releaseTag = "app-v$version"
+          $versionDirectory = Join-Path "public-assets/files" $version
+
+          New-Item -ItemType Directory -Force -Path $versionDirectory | Out-Null
+          gh release download $releaseTag --repo "${{ github.repository }}" --dir $versionDirectory
+
+          $generatedManifestPath = Join-Path $versionDirectory "latest.json"
+          if (-not (Test-Path -LiteralPath $generatedManifestPath)) {
+            throw "Le manifeste latest.json n'a pas été généré."
+          }
+
+          $manifest = Get-Content -Raw -LiteralPath $generatedManifestPath | ConvertFrom-Json
+
+          foreach ($platform in $manifest.platforms.PSObject.Properties) {
+            $originalUrl = [Uri]$platform.Value.url
+            $fileName = [Uri]::UnescapeDataString(
+              [System.IO.Path]::GetFileName($originalUrl.AbsolutePath)
+            )
+            $localArtifact = Join-Path $versionDirectory $fileName
+
+            if (-not (Test-Path -LiteralPath $localArtifact)) {
+              throw "Artefact de mise à jour introuvable : $fileName"
+            }
+
+            $encodedFileName = [Uri]::EscapeDataString($fileName)
+            $platform.Value.url = "https://raw.githubusercontent.com/Raimon77/white-account-updates/main/files/$version/$encodedFileName"
+          }
+
+          $manifest | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 -LiteralPath "public-assets/latest.json"
+
+      - name: Checkout public updater repository
+        uses: actions/checkout@v4
+        with:
+          repository: Raimon77/white-account-updates
+          ssh-key: ${{ secrets.UPDATES_DEPLOY_KEY }}
+          path: public-updates
+
+      - name: Publish public updater files
+        shell: pwsh
+        run: |
+          $version = "${{ steps.tauri.outputs.appVersion }}"
+          $sourceDirectory = Join-Path "public-assets/files" $version
+          $targetDirectory = Join-Path "public-updates/files" $version
+
+          New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
+          Copy-Item -Path "$sourceDirectory/*" -Destination $targetDirectory -Force
+          Copy-Item -LiteralPath "public-assets/latest.json" -Destination "public-updates/latest.json" -Force
+
+          Push-Location public-updates
+          try {
+            git config user.name "white-account-release-bot"
+            git config user.email "white-account-release-bot@users.noreply.github.com"
+            git add latest.json files
+
+            git diff --cached --quiet
+            if ($LASTEXITCODE -ne 0) {
+              git commit -m "Publish White Account $version"
+              git push origin main
+            }
+          } finally {
+            Pop-Location
+          }

@@ -1,13 +1,14 @@
 {
   "name": "white-account-frontend",
   "private": true,
-  "version": "0.4.12",
+  "version": "0.4.13",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "release:check": "node scripts/validate-release-version.mjs",
+    "updater:check": "node scripts/validate-updater-config.mjs",
     "security:check": "node scripts/validate-tauri-security.mjs",
     "preview": "vite preview",
     "tauri": "tauri"

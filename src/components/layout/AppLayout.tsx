@@ -133,6 +133,10 @@ function AppLayout() {
         }
       } catch (error) {
         console.error('Erreur lors de la vérification des mises à jour:', error);
+        await message(
+          "La vérification automatique des mises à jour a échoué. Vérifiez votre connexion internet, puis relancez White Account.",
+          { title: 'Mise à jour indisponible', kind: 'warning' }
+        );
       }
     }
     

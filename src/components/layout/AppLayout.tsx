@@ -151,11 +151,14 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-950">
+    <div className="aurora-app-shell relative min-h-screen overflow-x-hidden text-slate-950">
+      <div className="aurora-app-glow aurora-app-glow-blue" aria-hidden="true" />
+      <div className="aurora-app-glow aurora-app-glow-orange" aria-hidden="true" />
+
       {/* Topbar mobile */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="aurora-topbar sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+          <div className="aurora-brand-mark flex h-10 w-10 items-center justify-center rounded-2xl text-white">
             <Boxes size={22} />
           </div>
 
@@ -170,7 +173,7 @@ function AppLayout() {
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-sm"
+          className="rounded-xl border border-blue-100 bg-white/85 p-2 text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
         >
           <Menu size={20} />
         </button>
@@ -179,7 +182,7 @@ function AppLayout() {
       {/* Overlay mobile */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/50 lg:hidden">
-          <div className="h-full w-80 max-w-[85vw] bg-[#0F172A] shadow-2xl">
+          <div className="aurora-sidebar h-full w-80 max-w-[85vw] shadow-2xl">
             <SidebarContent
               logout={logout}
               closeMobile={() => setMobileOpen(false)}
@@ -190,15 +193,15 @@ function AppLayout() {
       )}
 
       {/* Sidebar desktop */}
-      <aside className="fixed left-0 top-0 hidden h-screen w-72 bg-[#080F1F] text-white shadow-2xl lg:block border-r border-white/5">
+      <aside className="aurora-sidebar fixed left-0 top-0 z-40 hidden h-screen w-72 text-white shadow-2xl lg:block">
         <SidebarContent logout={logout} user={user} />
       </aside>
 
       {/* Main */}
-      <main className="lg:pl-72">
+      <main className="relative z-10 lg:pl-72">
         <Topbar user={user} />
 
-        <div className="min-h-[calc(100vh-81px)] p-4 md:p-6">
+        <div className="min-h-[calc(100vh-81px)] p-4 md:p-6 lg:p-7">
           <Outlet />
         </div>
       </main>
@@ -220,10 +223,11 @@ type SidebarContentProps = {
 
 function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col overflow-hidden">
+      <div className="aurora-sidebar-glow" aria-hidden="true" />
       <div className="flex items-start justify-between border-b border-white/5 px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-blue-600/20">
+          <div className="aurora-logo-ring flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
             <img src="/logo.jpg" alt="White Account Logo" className="h-full w-full object-cover" />
           </div>
 
@@ -232,6 +236,10 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
               WHITE ACCOUNT
             </h1>
             <p className="text-xs text-slate-300">Gestion commerciale</p>
+            <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-blue-300">
+              <span className="aurora-live-dot h-1.5 w-1.5 rounded-full bg-blue-400" />
+              Espace actif
+            </div>
           </div>
         </div>
 
@@ -256,16 +264,16 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
               to={item.path}
               onClick={closeMobile}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                `aurora-nav-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-blue-600/10 text-blue-500 shadow-[inset_4px_0_0_0_rgba(59,130,246,1)]"
+                    ? "is-active bg-blue-500/15 text-blue-300"
                     : "text-slate-400 hover:bg-white/5 hover:text-white"
                 }`
               }
             >
               <Icon size={18} className={`transition-colors ${
                 window.location.pathname.startsWith(item.path) 
-                  ? "text-blue-500" 
+                  ? "text-blue-300"
                   : "text-slate-500 group-hover:text-slate-300"
               }`} />
               <span>{item.title}</span>
@@ -277,7 +285,7 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
       <div className="space-y-3 border-t border-white/5 p-5">
         <div className="rounded-2xl border border-white/5 bg-white/5 p-3 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-inner">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-orange-400 text-sm font-bold text-white shadow-lg shadow-blue-950/20">
               {(user?.full_name || "AD").slice(0, 2).toUpperCase()}
             </div>
 
@@ -286,7 +294,7 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
                 {user?.full_name || "Admin User"}
               </p>
               <p className="truncate text-xs text-slate-400">
-                {user?.email || "admin@REMOVED_TAURI_SIGNING_PASSWORD.com"}
+                {user?.email || "Administrateur White Account"}
               </p>
             </div>
           </div>
@@ -315,10 +323,10 @@ function Topbar({ user }: { user?: UserType }) {
   const currentPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   return (
-    <header className="sticky top-0 z-20 hidden border-b border-slate-200/60 bg-white/80 backdrop-blur-xl lg:block shadow-sm">
+    <header className="aurora-topbar sticky top-0 z-30 hidden border-b backdrop-blur-xl lg:block">
       <div className="flex h-20 items-center justify-between px-8">
         <div className="flex items-center gap-4">
-          <button className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm">
+          <button className="rounded-xl border border-blue-100 bg-white/80 p-2 text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700">
             <Menu size={20} />
           </button>
 
@@ -333,7 +341,7 @@ function Topbar({ user }: { user?: UserType }) {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white/50 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
+          <button className="flex items-center gap-2 rounded-full border border-blue-100 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-white">
             <CalendarDays size={16} className="text-blue-600" />
             {currentPeriod}
             <ChevronDown size={14} className="text-slate-400" />
@@ -341,7 +349,7 @@ function Topbar({ user }: { user?: UserType }) {
 
           <button 
             onClick={() => navigate('/alerts')}
-            className="group relative rounded-full border border-slate-200/60 bg-white/50 p-2.5 text-slate-600 shadow-sm transition hover:bg-blue-50 hover:text-blue-600"
+            className="group relative rounded-full border border-blue-100 bg-white/70 p-2.5 text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
           >
             <Bell size={18} />
             <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
@@ -353,7 +361,7 @@ function Topbar({ user }: { user?: UserType }) {
 
           <button 
             onClick={() => navigate('/settings')}
-            className="flex items-center gap-3 rounded-full border border-slate-200/60 bg-white/50 py-1.5 pl-2 pr-3 shadow-sm transition hover:bg-slate-50"
+            className="flex items-center gap-3 rounded-full border border-blue-100 bg-white/70 py-1.5 pl-2 pr-3 shadow-sm transition hover:border-blue-200 hover:bg-white"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
               <Store size={16} />

@@ -62,13 +62,13 @@ body {
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0.008 255);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.546 0.245 262.881);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -79,7 +79,7 @@ body {
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.623 0.214 259.815);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -153,6 +153,215 @@ body:not(.role-admin) .admin-only {
     radial-gradient(at 100% 0%, hsla(217, 100%, 94%, 1) 0px, transparent 50%),
     radial-gradient(at 0% 100%, hsla(214, 100%, 97%, 1) 0px, transparent 50%),
     radial-gradient(at 100% 100%, hsla(217, 100%, 92%, 1) 0px, transparent 50%);
+}
+
+.aurora-app-shell {
+  background:
+    radial-gradient(circle at 82% 6%, rgba(59, 130, 246, 0.09), transparent 27rem),
+    radial-gradient(circle at 74% 94%, rgba(249, 115, 22, 0.06), transparent 24rem),
+    linear-gradient(145deg, #f8fbff 0%, #f6f8fc 52%, #f9fafc 100%);
+}
+
+.aurora-app-glow {
+  position: fixed;
+  z-index: 0;
+  border-radius: 9999px;
+  filter: blur(100px);
+  pointer-events: none;
+  opacity: 0.45;
+  animation: aurora-app-drift 12s ease-in-out infinite alternate;
+}
+
+.aurora-app-glow-blue {
+  right: 4%;
+  top: -10rem;
+  width: 28rem;
+  height: 28rem;
+  background: rgba(37, 99, 235, 0.13);
+}
+
+.aurora-app-glow-orange {
+  right: 38%;
+  bottom: -14rem;
+  width: 24rem;
+  height: 24rem;
+  background: rgba(249, 115, 22, 0.08);
+  animation-delay: -5s;
+}
+
+.aurora-sidebar {
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
+  background:
+    radial-gradient(circle at 24% 8%, rgba(37, 99, 235, 0.2), transparent 14rem),
+    linear-gradient(180deg, #07111f 0%, #0a1528 46%, #07101e 100%);
+}
+
+.aurora-sidebar-glow {
+  position: absolute;
+  top: -6rem;
+  right: -7rem;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 9999px;
+  background: rgba(59, 130, 246, 0.16);
+  filter: blur(58px);
+  pointer-events: none;
+  animation: aurora-sidebar-breathe 8s ease-in-out infinite alternate;
+}
+
+.aurora-brand-mark {
+  background: linear-gradient(145deg, #2563eb, #4f46e5 70%, #f97316 145%);
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.28);
+}
+
+.aurora-logo-ring {
+  box-shadow:
+    0 0 0 1px rgba(147, 197, 253, 0.2),
+    0 12px 32px rgba(37, 99, 235, 0.23);
+}
+
+.aurora-live-dot {
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 0 12px rgba(96, 165, 250, 0.8);
+  animation: aurora-live-pulse 2.4s ease-in-out infinite;
+}
+
+.aurora-nav-link {
+  position: relative;
+}
+
+.aurora-nav-link.is-active::before {
+  content: "";
+  position: absolute;
+  left: -0.25rem;
+  width: 3px;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #60a5fa, #818cf8);
+  box-shadow: 0 0 16px rgba(96, 165, 250, 0.7);
+}
+
+.aurora-topbar {
+  border-color: rgba(191, 219, 254, 0.6);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 10px 36px rgba(15, 23, 42, 0.045);
+}
+
+.aurora-dashboard > * {
+  animation: aurora-rise-in 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.aurora-dashboard > *:nth-child(2) { animation-delay: 70ms; }
+.aurora-dashboard > *:nth-child(3) { animation-delay: 120ms; }
+.aurora-dashboard > *:nth-child(4) { animation-delay: 170ms; }
+.aurora-dashboard > *:nth-child(5) { animation-delay: 220ms; }
+
+.aurora-dashboard-hero {
+  position: relative;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.82)),
+    radial-gradient(circle at 82% 20%, rgba(59, 130, 246, 0.16), transparent 20rem);
+}
+
+.aurora-dashboard-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #2563eb, #6366f1 62%, #f97316);
+}
+
+.aurora-hero-orb {
+  filter: blur(12px);
+  pointer-events: none;
+  animation: aurora-orbit 9s ease-in-out infinite alternate;
+}
+
+.aurora-hero-orb-orange {
+  animation-delay: -3.5s;
+}
+
+.aurora-profit-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 14px 35px rgba(37, 99, 235, 0.08);
+}
+
+.aurora-stat-card {
+  position: relative;
+}
+
+.aurora-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -45%;
+  width: 28%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  opacity: 0;
+  transition: left 650ms ease, opacity 250ms ease;
+}
+
+.aurora-stat-card:hover::before {
+  left: 120%;
+  opacity: 1;
+}
+
+.aurora-chart-bar {
+  position: relative;
+  transform-origin: left;
+  animation: aurora-bar-grow 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.aurora-loading {
+  animation: aurora-loading-breathe 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-app-drift {
+  from { transform: translate3d(-1rem, -0.5rem, 0) scale(0.92); }
+  to { transform: translate3d(1.5rem, 1rem, 0) scale(1.08); }
+}
+
+@keyframes aurora-sidebar-breathe {
+  from { opacity: 0.45; transform: scale(0.9); }
+  to { opacity: 0.9; transform: scale(1.12); }
+}
+
+@keyframes aurora-live-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes aurora-rise-in {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes aurora-orbit {
+  from { transform: translate3d(-0.8rem, -0.4rem, 0) scale(0.92); opacity: 0.55; }
+  to { transform: translate3d(1.2rem, 0.9rem, 0) scale(1.1); opacity: 0.9; }
+}
+
+@keyframes aurora-bar-grow {
+  from { transform: scaleX(0.08); opacity: 0.4; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes aurora-loading-breathe {
+  from { transform: translateY(0); box-shadow: 0 12px 32px rgba(37, 99, 235, 0.05); }
+  to { transform: translateY(-3px); box-shadow: 0 18px 42px rgba(37, 99, 235, 0.11); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-app-glow,
+  .aurora-sidebar-glow,
+  .aurora-live-dot,
+  .aurora-dashboard > *,
+  .aurora-hero-orb,
+  .aurora-chart-bar,
+  .aurora-loading {
+    animation: none !important;
+  }
 }
 
 .auth-login-shell {

@@ -170,7 +170,7 @@ function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
-        <div className="rounded-2xl border bg-white px-6 py-5 shadow-sm">
+        <div className="aurora-loading rounded-2xl border border-blue-100 bg-white/90 px-6 py-5 shadow-lg shadow-blue-950/5 backdrop-blur-xl">
           <p className="text-sm font-medium text-slate-600">
             Chargement du dashboard...
           </p>
@@ -199,12 +199,12 @@ function DashboardPage() {
   const topProducts = dashboard?.top_products || [];
 
   return (
-    <div className="space-y-6">
+    <div className="aurora-dashboard space-y-6">
       {/* Header dashboard */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className="aurora-dashboard-hero overflow-hidden rounded-3xl border border-blue-100/80 bg-white/90 shadow-xl shadow-blue-950/5 backdrop-blur-xl">
         <div className="relative p-6">
-          <div className="absolute right-0 top-0 h-32 w-32 rounded-bl-full bg-blue-50" />
-          <div className="absolute bottom-0 right-24 h-20 w-20 rounded-full bg-orange-50" />
+          <div className="aurora-hero-orb aurora-hero-orb-blue absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-100/70" />
+          <div className="aurora-hero-orb aurora-hero-orb-orange absolute bottom-[-3rem] right-28 h-28 w-28 rounded-full bg-orange-100/70" />
 
           <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
@@ -241,7 +241,7 @@ function DashboardPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="aurora-profit-card rounded-2xl border border-blue-100 bg-white/75 px-5 py-4 shadow-lg shadow-blue-950/5 backdrop-blur-xl">
               <p className="text-xs font-medium text-slate-500">
                 Bénéfice réel net
               </p>
@@ -373,9 +373,9 @@ function DashboardPage() {
                       </span>
                     </div>
 
-                    <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-3 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/50">
                       <div
-                        className={`h-full rounded-full ${item.color}`}
+                        className={`aurora-chart-bar h-full rounded-full ${item.color}`}
                         style={{ width: `${width}%` }}
                       />
                     </div>
@@ -661,7 +661,7 @@ function StatCard({
   trendType,
 }: StatCardProps) {
   return (
-    <Card className="overflow-hidden border-slate-200/60 bg-gradient-to-br from-white to-slate-50/50 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200">
+    <Card className="aurora-stat-card overflow-hidden border-blue-100/70 bg-gradient-to-br from-white via-white to-blue-50/40 shadow-lg shadow-blue-950/5 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-950/10">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <div

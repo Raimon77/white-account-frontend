@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "White Account",
-  "version": "0.4.7",
-  "identifier": "com.REMOVED_TAURI_SIGNING_PASSWORD.desktop",
+  "version": "0.4.9",
+  "identifier": "com.whiteaccount.desktop",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",

@@ -7,7 +7,6 @@ import {
   Eye,
   Loader2,
   Lock,
-  Plus,
   RefreshCcw,
   Search,
   Trash2,

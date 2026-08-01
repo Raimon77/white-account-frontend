@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Edit,
   Loader2,
@@ -57,7 +57,7 @@ function SuppliersPage() {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [formData, setFormData] = useState<SupplierFormData>(emptyForm);
 
-  async function loadFournisseurs() {
+  const loadFournisseurs = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -80,11 +80,12 @@ function SuppliersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadFournisseurs();
-  }, []);
+    const timeoutId = window.setTimeout(() => void loadFournisseurs(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadFournisseurs]);
 
   const filteredFournisseurs = useMemo(() => {
     const keyword = search.trim().toLowerCase();

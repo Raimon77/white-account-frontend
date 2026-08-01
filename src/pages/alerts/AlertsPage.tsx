@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { AlertTriangle, Bell, Calendar, Mail, PlayCircle, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -95,7 +95,7 @@ export default function AlertsPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  async function loadAlerts() {
+  const loadAlerts = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -108,11 +108,12 @@ export default function AlertsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [days]);
 
   useEffect(() => {
-    loadAlerts();
-  }, [days]);
+    const timeoutId = window.setTimeout(() => void loadAlerts(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadAlerts]);
 
   async function handleRunJobs() {
     try {

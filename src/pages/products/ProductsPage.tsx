@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   AlertTriangle,
   Boxes,
@@ -80,7 +80,7 @@ function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyForm);
 
-  async function loadProducts() {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -102,11 +102,12 @@ function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    const timeoutId = window.setTimeout(() => void loadProducts(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadProducts]);
 
   const filteredProducts = useMemo(() => {
     const keyword = search.trim().toLowerCase();

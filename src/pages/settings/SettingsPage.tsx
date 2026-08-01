@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import {
   Boxes,
@@ -40,9 +41,28 @@ const DEFAULT_BOUTIQUE: BoutiqueConfig = {
   taxNumber: "CI-ABJ-03-2026-B12-00452",
 };
 
+function getStoredUser(): UserProfile | null {
+  try {
+    const userRaw = localStorage.getItem("white_account_user");
+    return userRaw ? (JSON.parse(userRaw) as UserProfile) : null;
+  } catch {
+    localStorage.removeItem("white_account_user");
+    return null;
+  }
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: unknown } | undefined;
+    return typeof data?.message === "string" ? data.message : fallback;
+  }
+
+  return fallback;
+}
+
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"profile" | "boutique" | "team">("profile");
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user] = useState<UserProfile | null>(getStoredUser);
   const [boutique, setBoutique] = useState<BoutiqueConfig>(DEFAULT_BOUTIQUE);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -53,15 +73,6 @@ function SettingsPage() {
   const [savingPwd, setSavingPwd] = useState(false);
 
   useEffect(() => {
-    try {
-      const userRaw = localStorage.getItem("white_account_user");
-      if (userRaw) {
-        setUser(JSON.parse(userRaw) as UserProfile);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
     const fetchSettings = async () => {
       try {
         const { data } = await api.get('/settings');
@@ -104,8 +115,13 @@ function SettingsPage() {
       localStorage.setItem("white_account_boutique", JSON.stringify(boutique));
       setSuccessMsg("Paramètres de la boutique enregistrés avec succès !");
       setTimeout(() => setSuccessMsg(""), 3000);
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || "Erreur lors de la sauvegarde sur le serveur.");
+    } catch (error: unknown) {
+      setErrorMsg(
+        getApiErrorMessage(
+          error,
+          "Erreur lors de la sauvegarde sur le serveur."
+        )
+      );
     } finally {
       setSaving(false);
     }
@@ -132,8 +148,13 @@ function SettingsPage() {
       setSuccessMsg("Votre mot de passe a été modifié avec succès !");
       setPwdData({ current_password: "", new_password: "", confirm_password: "" });
       setTimeout(() => setSuccessMsg(""), 4000);
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.message || "Erreur lors du changement de mot de passe.");
+    } catch (error: unknown) {
+      setErrorMsg(
+        getApiErrorMessage(
+          error,
+          "Erreur lors du changement de mot de passe."
+        )
+      );
       setTimeout(() => setErrorMsg(""), 4000);
     } finally {
       setSavingPwd(false);

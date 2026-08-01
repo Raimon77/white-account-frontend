@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Plus, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,15 @@ type UserType = {
   is_active: boolean;
   created_at: string;
 };
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: unknown } | undefined;
+    return typeof data?.message === "string" ? data.message : fallback;
+  }
+
+  return fallback;
+}
 
 export default function UsersSettings() {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -38,8 +48,8 @@ export default function UsersSettings() {
       setShowForm(false);
       setFormData({ full_name: "", email: "", password: "", role: "employee" });
       fetchUsers();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Erreur lors de la création");
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, "Erreur lors de la création"));
     }
   }
 
@@ -49,8 +59,8 @@ export default function UsersSettings() {
       const endpoint = currentStatus ? `/users/${userId}/deactivate` : `/users/${userId}/activate`;
       await api.patch(endpoint);
       fetchUsers();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "Erreur de statut");
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, "Erreur de statut"));
     }
   }
 

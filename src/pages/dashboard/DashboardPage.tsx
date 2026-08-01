@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -109,7 +109,7 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadDashboard() {
+  const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -124,11 +124,12 @@ function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [periodKey]);
 
   useEffect(() => {
-    loadDashboard();
-  }, [periodKey]);
+    const timeoutId = window.setTimeout(() => void loadDashboard(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadDashboard]);
 
   const summary = dashboard?.summary;
 
@@ -214,7 +215,7 @@ function DashboardPage() {
                   if (input && 'showPicker' in input) {
                     try {
                       input.showPicker();
-                    } catch (err) {
+                    } catch {
                       // fallback for older browsers
                     }
                   }

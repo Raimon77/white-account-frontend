@@ -12,6 +12,15 @@ import {
 } from "@/components/ui/card";
 import { ShieldCheck, ArrowLeft, KeyRound, Mail } from "lucide-react";
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: unknown } | undefined;
+    return typeof data?.message === "string" ? data.message : fallback;
+  }
+
+  return fallback;
+}
+
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
 
@@ -34,8 +43,8 @@ export default function ForgotPasswordPage() {
       await api.post("/auth/forgot-password", { email });
       setSuccess("Si ce compte existe, un code à 6 chiffres a été envoyé à votre adresse email.");
       setStep(2);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur de connexion au serveur");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Erreur de connexion au serveur"));
     } finally {
       setLoading(false);
     }
@@ -59,8 +68,8 @@ export default function ForgotPasswordPage() {
       await api.post("/auth/reset-password", { email, code, new_password: newPassword });
       setSuccess("Votre mot de passe a été réinitialisé avec succès !");
       setTimeout(() => navigate("/login"), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur de réinitialisation");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Erreur de réinitialisation"));
     } finally {
       setLoading(false);
     }

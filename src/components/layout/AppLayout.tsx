@@ -19,7 +19,6 @@ import {
   Receipt,
   RefreshCcw,
   Settings,
-  ShoppingBag,
   ShoppingCart,
   Store,
   Truck,

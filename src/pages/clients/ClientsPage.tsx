@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Edit,
   Loader2,
@@ -57,7 +57,7 @@ function ClientsPage() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [formData, setFormData] = useState<ClientFormData>(emptyForm);
 
-  async function loadClients() {
+  const loadClients = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -80,11 +80,12 @@ function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadClients();
-  }, []);
+    const timeoutId = window.setTimeout(() => void loadClients(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadClients]);
 
   const filteredClients = useMemo(() => {
     const keyword = search.trim().toLowerCase();

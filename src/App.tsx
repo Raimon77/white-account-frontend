@@ -21,16 +21,8 @@ import SalesPage from "@/pages/sales/SalesPage";
 import AlertsPage from "@/pages/alerts/AlertsPage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 
-import { useEffect } from "react";
-import { check } from "@tauri-apps/plugin-updater";
-import { ask, message } from "@tauri-apps/plugin-dialog";
-
 function App() {
   const token = localStorage.getItem("white_account_token");
-
-  useEffect(() => {
-    // Updater removed
-  }, []);
 
   return (
     <BrowserRouter>

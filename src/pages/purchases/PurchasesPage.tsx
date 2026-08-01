@@ -1,7 +1,6 @@
 import axios from "axios";
-import { useEffect, useMemo, useState, type ElementType, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type ElementType, type FormEvent } from "react";
 import {
-  CalendarDays,
   Edit,
   Eye,
   Loader2,
@@ -169,7 +168,7 @@ function PurchasesPage() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedDetails, setSelectedDetails] = useState<PurchaseDetails | null>(null);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -194,11 +193,12 @@ function PurchasesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const timeoutId = window.setTimeout(() => void loadData(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadData]);
 
   const filteredPurchases = useMemo(() => {
     const keyword = search.trim().toLowerCase();

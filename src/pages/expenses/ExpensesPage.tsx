@@ -1,8 +1,7 @@
 import axios from "axios";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Calendar,
-  ChevronDown,
   Edit,
   Loader2,
   Plus,
@@ -178,7 +177,7 @@ function ExpensesPage() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [formData, setFormData] = useState<ExpenseFormData>(emptyForm);
 
-  async function loadExpenses() {
+  const loadExpenses = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -195,9 +194,9 @@ function ExpensesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [categoryFilter, periodKey]);
 
-  async function loadSummary() {
+  const loadSummary = useCallback(async () => {
     try {
       setSummaryLoading(true);
       const response = await api.get("/expenses/summary", {
@@ -210,15 +209,16 @@ function ExpensesPage() {
     } finally {
       setSummaryLoading(false);
     }
-  }
+  }, [periodKey]);
 
-  function reloadAll() {
+  const reloadAll = useCallback(() => {
     void Promise.all([loadExpenses(), loadSummary()]);
-  }
+  }, [loadExpenses, loadSummary]);
 
   useEffect(() => {
-    reloadAll();
-  }, [periodKey, categoryFilter]);
+    const timeoutId = window.setTimeout(reloadAll, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [reloadAll]);
 
   const filteredExpenses = useMemo(() => {
     if (!search.trim()) return expenses;

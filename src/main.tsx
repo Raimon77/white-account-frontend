@@ -10,7 +10,9 @@ if (userRaw) {
     if (user.role === 'admin') {
       document.body.classList.add('role-admin');
     }
-  } catch (e) {}
+  } catch {
+    localStorage.removeItem("white_account_user");
+  }
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "security:check": "node scripts/validate-tauri-security.mjs",
     "preview": "vite preview",
     "tauri": "tauri"
   },

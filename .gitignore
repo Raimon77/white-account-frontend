@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 
 # Tauri and Secrets
+key
+key.pub
 updater.key
 updater.key.pub
 .env.production

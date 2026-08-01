@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "White Account",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "identifier": "com.whiteaccount.desktop",
   "build": {
     "frontendDist": "../dist",
@@ -64,7 +64,7 @@
       "endpoints": [
         "https://github.com/Raimon77/white-account-frontend/releases/latest/download/latest.json"
       ],
-      "pubkey": "ZFc1MGNuVnpkR1ZrSUdOdmJXMWxiblE2SUcxcGJtbHphV2R1SUhCMVlteHBZeUJyWlhrNklERXpSVFpFUkRoRk9UZzBOakJDTlRnS1VsZFNXVU13WVZscWRETnRSVGc1Y1hOeGVWSmlhM0JHZVVSU1RrTkNlRUptUWpOWU1ua3dOelZWYVV3d2EwRktlSFF6VWpSc1NqQUs="
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzRTZERDhFOTg0NjBCNTgKUldSWUMwYVlqdDNtRTg5cXNxeVJia3BGeURSTkNCeEJmQjNYMnkwNzVVaUwwa0FKeHQzUjRsSjAK"
     }
   }
 }

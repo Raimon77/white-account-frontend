@@ -20,9 +20,10 @@ import PurchasesPage from "@/pages/purchases/PurchasesPage";
 import SalesPage from "@/pages/sales/SalesPage";
 import AlertsPage from "@/pages/alerts/AlertsPage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
+import { hasActiveSession } from "@/auth/session";
 
 function App() {
-  const token = localStorage.getItem("white_account_token");
+  const hasSession = hasActiveSession();
 
   return (
     <BrowserRouter>
@@ -30,7 +31,7 @@ function App() {
         <Route
           path="/"
           element={
-            token ? (
+            hasSession ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <Navigate to="/login" replace />

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { clearAuthSession } from "@/auth/session";
 
 const menuItems = [
   {
@@ -141,9 +142,7 @@ function AppLayout() {
   }, []);
 
   function logout() {
-    localStorage.removeItem("white_account_token");
-    localStorage.removeItem("white_account_user");
-    document.body.classList.remove("role-admin");
+    clearAuthSession();
     navigate("/login");
   }
 

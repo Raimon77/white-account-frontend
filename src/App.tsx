@@ -21,12 +21,15 @@ import SalesPage from "@/pages/sales/SalesPage";
 import AlertsPage from "@/pages/alerts/AlertsPage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import { hasActiveSession } from "@/auth/session";
+import UpdateManager from "@/components/updater/UpdateManager";
 
 function App() {
   const hasSession = hasActiveSession();
 
   return (
-    <BrowserRouter>
+    <>
+      <UpdateManager />
+      <BrowserRouter>
       <Routes>
         <Route
           path="/"
@@ -90,7 +93,8 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </>
   );
 }
 

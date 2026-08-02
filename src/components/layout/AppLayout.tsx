@@ -1,8 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
-import { ask, message } from '@tauri-apps/plugin-dialog';
 import {
   BarChart3,
   Bell,
@@ -114,35 +111,6 @@ function AppLayout() {
     } catch {
       return null;
     }
-  }, []);
-
-  useEffect(() => {
-    async function checkForUpdates() {
-      try {
-        const update = await check();
-        if (update) {
-          const yes = await ask(
-            `Une mise à jour vers la version ${update.version} est disponible.\n\nVoulez-vous l'installer maintenant ?`, 
-            { title: 'Mise à jour disponible', kind: 'info' }
-          );
-          if (yes) {
-            await message('Le téléchargement va commencer. Le logiciel redémarrera tout seul une fois l\'installation terminée.', { title: 'Mise à jour en cours' });
-            await update.downloadAndInstall();
-            await relaunch();
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la vérification des mises à jour:', error);
-        await message(
-          "La vérification automatique des mises à jour a échoué. Vérifiez votre connexion internet, puis relancez White Account.",
-          { title: 'Mise à jour indisponible', kind: 'warning' }
-        );
-      }
-    }
-    
-    // Check after a short delay so we don't block the initial render
-    const timer = setTimeout(checkForUpdates, 3000);
-    return () => clearTimeout(timer);
   }, []);
 
   function logout() {

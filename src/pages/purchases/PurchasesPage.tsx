@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Product = {
   id: string;
@@ -154,6 +156,7 @@ function PurchasesPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -203,25 +206,27 @@ function PurchasesPage() {
   const filteredPurchases = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    if (!keyword) return purchases;
-
     return purchases.filter((purchase) => {
       const number = getPurchaseNumber(purchase);
-
-      return (
+      const matchesSearch =
+        !keyword ||
         number.toLowerCase().includes(keyword) ||
         purchase.supplier_name?.toLowerCase().includes(keyword) ||
         purchase.observation?.toLowerCase().includes(keyword) ||
-        purchase.id.toLowerCase().includes(keyword)
+        purchase.id.toLowerCase().includes(keyword);
+
+      return (
+        matchesMonth(purchase.purchase_date || purchase.date, monthFilter) &&
+        matchesSearch
       );
     });
-  }, [purchases, search]);
+  }, [purchases, search, monthFilter]);
 
   const totalPurchasesAmount = useMemo(() => {
-    return purchases.reduce((total, purchase) => {
+    return filteredPurchases.reduce((total, purchase) => {
       return total + getPurchaseAmount(purchase);
     }, 0);
-  }, [purchases]);
+  }, [filteredPurchases]);
 
   const formTotal = useMemo(() => {
     return formData.items.reduce((total, item) => {
@@ -487,7 +492,7 @@ function PurchasesPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total achats"
-          value={String(purchases.length)}
+          value={String(filteredPurchases.length)}
           icon={ShoppingCart}
           colorClassName="bg-blue-50 text-blue-700"
         />
@@ -515,7 +520,7 @@ function PurchasesPage() {
       </div>
 
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="grid gap-3 p-5 md:grid-cols-[minmax(0,1fr)_auto]">
           <div className="relative">
             <Search
               size={18}
@@ -529,6 +534,7 @@ function PurchasesPage() {
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
             />
           </div>
+          <MonthFilter value={monthFilter} onChange={setMonthFilter} />
         </CardContent>
       </Card>
 

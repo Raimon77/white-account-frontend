@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Client = {
   id: string;
@@ -281,6 +283,7 @@ function OrdersPage() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -353,33 +356,39 @@ function OrdersPage() {
       const matchesStatus =
         statusFilter === "all" || order.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      return (
+        matchesMonth(order.order_date, monthFilter) &&
+        matchesSearch &&
+        matchesStatus
+      );
     });
-  }, [orders, search, statusFilter]);
+  }, [orders, search, statusFilter, monthFilter]);
 
   const stats = useMemo(() => {
-    const total = orders.reduce((sum, o) => sum + toNumber(o.total_amount), 0);
-    const converted = orders
+    const total = filteredOrders.reduce((sum, o) => sum + toNumber(o.total_amount), 0);
+    const converted = filteredOrders
       .filter((o) => o.status === "converted")
       .reduce((sum, o) => sum + toNumber(o.total_amount), 0);
-    const confirmed = orders
+    const confirmed = filteredOrders
       .filter((o) => o.status === "confirmed")
       .reduce((sum, o) => sum + toNumber(o.total_amount), 0);
-    const pending = orders
+    const pending = filteredOrders
       .filter((o) => o.status === "draft" || o.status === "cancelled")
       .reduce((sum, o) => sum + toNumber(o.total_amount), 0);
 
     return {
       total,
-      totalCount: orders.length,
+      totalCount: filteredOrders.length,
       converted,
-      convertedCount: orders.filter((o) => o.status === "converted").length,
+      convertedCount: filteredOrders.filter((o) => o.status === "converted").length,
       confirmed,
-      confirmedCount: orders.filter((o) => o.status === "confirmed").length,
+      confirmedCount: filteredOrders.filter((o) => o.status === "confirmed").length,
       pending,
-      pendingCount: orders.filter((o) => o.status === "draft" || o.status === "cancelled").length,
+      pendingCount: filteredOrders.filter(
+        (o) => o.status === "draft" || o.status === "cancelled"
+      ).length,
     };
-  }, [orders]);
+  }, [filteredOrders]);
 
   const formTotal = useMemo(() => {
     return formData.items.reduce((total, item) => {
@@ -742,7 +751,8 @@ function OrdersPage() {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <MonthFilter value={monthFilter} onChange={setMonthFilter} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

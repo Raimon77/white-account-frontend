@@ -15,8 +15,10 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Sale = {
   id: string;
@@ -232,6 +234,7 @@ function RefundsPage() {
   const [sales, setSales] = useState<Sale[]>([]);
 
   const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saleLoading, setSaleLoading] = useState(false);
@@ -290,21 +293,21 @@ function RefundsPage() {
         (refund.invoice_number || "").toLowerCase().includes(search.toLowerCase()) ||
         (refund.reason || "").toLowerCase().includes(search.toLowerCase());
 
-      return matchesSearch;
+      return matchesMonth(refund.refund_date, monthFilter) && matchesSearch;
     });
-  }, [refunds, search]);
+  }, [refunds, search, monthFilter]);
 
   const stats = useMemo(() => {
-    const total = refunds.reduce((sum, r) => sum + toNumber(r.amount), 0);
-    const count = refunds.length;
-    const restoredStockCount = refunds.filter((r) => r.restore_stock).length;
+    const total = filteredRefunds.reduce((sum, r) => sum + toNumber(r.amount), 0);
+    const count = filteredRefunds.length;
+    const restoredStockCount = filteredRefunds.filter((r) => r.restore_stock).length;
 
     return {
       total,
       count,
       restoredStockCount,
     };
-  }, [refunds]);
+  }, [filteredRefunds]);
 
   const formTotal = useMemo(() => {
     return formData.items
@@ -559,13 +562,16 @@ function RefundsPage() {
             />
           </div>
 
-          <Button
-            variant="outline"
-            onClick={loadData}
-            className="p-2.5 rounded-xl border bg-white text-slate-700 shadow-sm"
-          >
-            <RefreshCcw size={16} />
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <MonthFilter value={monthFilter} onChange={setMonthFilter} />
+            <Button
+              variant="outline"
+              onClick={loadData}
+              className="p-2.5 rounded-xl border bg-white text-slate-700 shadow-sm"
+            >
+              <RefreshCcw size={16} />
+            </Button>
+          </div>
         </div>
 
         <CardContent className="p-0">

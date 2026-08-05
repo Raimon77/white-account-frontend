@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Client = {
   id: string;
@@ -280,6 +282,7 @@ function QuotesPage() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -351,12 +354,16 @@ function QuotesPage() {
       const matchesStatus =
         statusFilter === "all" || quote.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      return (
+        matchesMonth(quote.quote_date, monthFilter) &&
+        matchesSearch &&
+        matchesStatus
+      );
     });
-  }, [quotes, search, statusFilter]);
+  }, [quotes, search, statusFilter, monthFilter]);
 
   const stats = useMemo(() => {
-    const activeQuotes = quotes;
+    const activeQuotes = filteredQuotes;
     const total = activeQuotes.reduce(
       (sum, q) => sum + toNumber(q.total_amount),
       0
@@ -385,7 +392,7 @@ function QuotesPage() {
         (q) => q.status === "rejected" || q.status === "expired"
       ).length,
     };
-  }, [quotes]);
+  }, [filteredQuotes]);
 
   const formTotal = useMemo(() => {
     return formData.items.reduce((total, item) => {
@@ -746,7 +753,8 @@ function QuotesPage() {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <MonthFilter value={monthFilter} onChange={setMonthFilter} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

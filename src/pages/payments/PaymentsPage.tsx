@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Sale = {
   id: string;
@@ -257,6 +259,7 @@ function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -301,26 +304,26 @@ function PaymentsPage() {
   const filteredPayments = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    if (!keyword) return payments;
-
     return payments.filter((payment) => {
-      return (
+      const matchesSearch =
+        !keyword ||
         getSaleNumber(payment).toLowerCase().includes(keyword) ||
         payment.receipt_number?.toLowerCase().includes(keyword) ||
         payment.client_name?.toLowerCase().includes(keyword) ||
         payment.reference?.toLowerCase().includes(keyword) ||
-        paymentMethodLabel(payment.payment_method).toLowerCase().includes(keyword)
-      );
+        paymentMethodLabel(payment.payment_method).toLowerCase().includes(keyword);
+
+      return matchesMonth(payment.payment_date, monthFilter) && matchesSearch;
     });
-  }, [payments, search]);
+  }, [payments, search, monthFilter]);
 
   const totalPaid = useMemo(() => {
-    return payments.reduce((total, payment) => total + toNumber(payment.amount), 0);
-  }, [payments]);
+    return filteredPayments.reduce((total, payment) => total + toNumber(payment.amount), 0);
+  }, [filteredPayments]);
 
   const paymentsWithReceipt = useMemo(() => {
-    return payments.filter((payment) => payment.receipt_pdf_url).length;
-  }, [payments]);
+    return filteredPayments.filter((payment) => payment.receipt_pdf_url).length;
+  }, [filteredPayments]);
 
   const pendingSales = useMemo(() => {
     return sales.filter((sale) => {
@@ -546,7 +549,7 @@ function PaymentsPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Paiements"
-          value={String(payments.length)}
+          value={String(filteredPayments.length)}
           icon={Receipt}
           colorClassName="bg-blue-50 text-blue-700"
         />
@@ -572,7 +575,7 @@ function PaymentsPage() {
       </div>
 
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="grid gap-3 p-5 md:grid-cols-[minmax(0,1fr)_auto]">
           <div className="relative">
             <Search
               size={18}
@@ -585,6 +588,7 @@ function PaymentsPage() {
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
             />
           </div>
+          <MonthFilter value={monthFilter} onChange={setMonthFilter} />
         </CardContent>
       </Card>
 

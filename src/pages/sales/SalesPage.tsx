@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import api from "@/api/api";
+import { MonthFilter } from "@/components/filters/MonthFilter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,6 +33,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { matchesMonth } from "@/lib/monthFilter";
 
 type Client = {
   id: string;
@@ -304,6 +306,7 @@ function SalesPage() {
   const [products, setProducts] = useState<Product[]>([]);
 
   const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -357,43 +360,42 @@ function SalesPage() {
   const filteredSales = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    if (!keyword) return sales;
-
     return sales.filter((sale) => {
       const number = getSaleNumber(sale);
-
-      return (
+      const matchesSearch =
+        !keyword ||
         number.toLowerCase().includes(keyword) ||
         sale.client_name?.toLowerCase().includes(keyword) ||
         sale.payment_status?.toLowerCase().includes(keyword) ||
         sale.sale_status?.toLowerCase().includes(keyword) ||
         sale.observation?.toLowerCase().includes(keyword) ||
-        sale.id.toLowerCase().includes(keyword)
-      );
+        sale.id.toLowerCase().includes(keyword);
+
+      return matchesMonth(sale.sale_date, monthFilter) && matchesSearch;
     });
-  }, [sales, search]);
+  }, [sales, search, monthFilter]);
 
   const totalSalesAmount = useMemo(() => {
-    return sales
+    return filteredSales
       .filter((sale) => sale.sale_status !== "cancelled")
       .reduce((total, sale) => total + toNumber(sale.total_amount), 0);
-  }, [sales]);
+  }, [filteredSales]);
 
   const totalPaidAmount = useMemo(() => {
-    return sales
+    return filteredSales
       .filter((sale) => sale.sale_status !== "cancelled")
       .reduce((total, sale) => total + toNumber(sale.amount_paid), 0);
-  }, [sales]);
+  }, [filteredSales]);
 
   const totalDueAmount = useMemo(() => {
-    return sales
+    return filteredSales
       .filter((sale) => sale.sale_status !== "cancelled")
       .reduce((total, sale) => total + toNumber(sale.balance_due), 0);
-  }, [sales]);
+  }, [filteredSales]);
 
   const activeSalesCount = useMemo(() => {
-    return sales.filter((sale) => sale.sale_status !== "cancelled").length;
-  }, [sales]);
+    return filteredSales.filter((sale) => sale.sale_status !== "cancelled").length;
+  }, [filteredSales]);
 
   const formTotal = useMemo(() => {
     return formData.items.reduce((total, item) => {
@@ -772,7 +774,7 @@ function SalesPage() {
       </div>
 
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="grid gap-3 p-5 md:grid-cols-[minmax(0,1fr)_auto]">
           <div className="relative">
             <Search
               size={18}
@@ -786,6 +788,7 @@ function SalesPage() {
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
             />
           </div>
+          <MonthFilter value={monthFilter} onChange={setMonthFilter} />
         </CardContent>
       </Card>
 

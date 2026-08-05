@@ -29,6 +29,7 @@ type DashboardSummary = {
   total_sales: number;
   total_refunds: number;
   net_sales: number;
+  total_activity: number;
   total_paid: number;
   total_refunded: number;
   net_paid: number;
@@ -260,7 +261,16 @@ function DashboardPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <StatCard
+          title="Activité globale"
+          value={formatMoney(summary.total_activity)}
+          icon={Banknote}
+          iconClassName="bg-indigo-50 text-indigo-700"
+          trend="Ventes + avoirs"
+          trendType="up"
+        />
+
         <StatCard
           title="Ventes brutes"
           value={formatMoney(summary.total_sales)}
@@ -353,7 +363,7 @@ function DashboardPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600">
-              2026-07
+              {periodKey}
             </div>
           </CardHeader>
 

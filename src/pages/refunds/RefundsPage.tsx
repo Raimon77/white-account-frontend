@@ -582,7 +582,7 @@ function RefundsPage() {
           ) : (
             <>
               {/* Desktop Table */}
-              <div className="hidden md:block overflow-x-auto">
+              <div className="app-horizontal-scroll hidden overflow-x-auto md:block">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
@@ -797,7 +797,7 @@ function RefundsPage() {
             {/* Items table */}
             <div className="space-y-3">
               <h4 className="font-semibold text-sm text-slate-900">Articles retournés</h4>
-              <div className="overflow-x-auto border rounded-xl">
+              <div className="app-horizontal-scroll overflow-x-auto rounded-xl border">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50 border-b font-medium text-slate-600">

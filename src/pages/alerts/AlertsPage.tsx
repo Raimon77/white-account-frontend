@@ -222,7 +222,7 @@ export default function AlertsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="app-horizontal-scroll overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="border-b border-slate-100 bg-slate-50/50 text-xs font-semibold uppercase text-slate-500">
               <tr>

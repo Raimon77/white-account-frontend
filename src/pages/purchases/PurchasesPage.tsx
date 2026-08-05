@@ -558,7 +558,7 @@ function PurchasesPage() {
             <EmptyPurchasesState onCreate={openCreateModal} />
           ) : (
             <>
-              <div className="hidden overflow-hidden rounded-2xl border border-slate-200 lg:block">
+              <div className="app-horizontal-scroll hidden overflow-x-auto rounded-2xl border border-slate-200 lg:block">
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                     <tr>
@@ -1092,7 +1092,7 @@ function PurchaseDetailsModal({
             </div>
           )}
 
-          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+          <div className="app-horizontal-scroll mt-5 overflow-x-auto rounded-2xl border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>

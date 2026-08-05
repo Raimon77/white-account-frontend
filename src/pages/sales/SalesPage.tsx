@@ -70,6 +70,8 @@ type Sale = {
   subscription_label?: string | null;
   next_subscription_date?: string | null;
   invoice_pdf_url?: string | null;
+  invoice_email_sent_at?: string | null;
+  invoice_email_sent_to?: string | null;
   created_at?: string;
 };
 
@@ -929,14 +931,16 @@ function SalesPage() {
                               size="sm"
                               className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
                               onClick={() => handleSendInvoice(sale)}
-                              disabled={emailLoadingId === sale.id}
+                              disabled={
+                                emailLoadingId === sale.id || Boolean(sale.invoice_email_sent_at)
+                              }
                             >
                               {emailLoadingId === sale.id ? (
                                 <Loader2 size={15} className="animate-spin" />
                               ) : (
                                 <Mail size={15} />
                               )}
-                              Envoyer
+                              {sale.invoice_email_sent_at ? "Envoyée" : "Envoyer"}
                             </Button>
 
                             <Button
@@ -1039,14 +1043,16 @@ function SalesPage() {
                         variant="outline"
                         className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
                         onClick={() => handleSendInvoice(sale)}
-                        disabled={emailLoadingId === sale.id}
+                        disabled={
+                          emailLoadingId === sale.id || Boolean(sale.invoice_email_sent_at)
+                        }
                       >
                         {emailLoadingId === sale.id ? (
                           <Loader2 size={15} className="animate-spin" />
                         ) : (
                           <Mail size={15} />
                         )}
-                        Envoyer
+                        {sale.invoice_email_sent_at ? "Envoyée" : "Envoyer"}
                       </Button>
 
                       <Button
@@ -1653,14 +1659,14 @@ function SaleDetailsModal({
               variant="outline"
               className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
               onClick={onEmail}
-              disabled={emailLoading}
+              disabled={emailLoading || Boolean(sale.invoice_email_sent_at)}
             >
               {emailLoading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <Mail size={16} />
               )}
-              Envoyer par email
+              {sale.invoice_email_sent_at ? "Facture déjà envoyée" : "Envoyer par email"}
             </Button>
 
             <Button

@@ -42,6 +42,8 @@ type Payment = {
   note?: string | null;
   receipt_number?: string | null;
   receipt_pdf_url?: string | null;
+  receipt_email_sent_at?: string | null;
+  receipt_email_sent_to?: string | null;
   invoice_number?: string | null;
   sale_date?: string | null;
   total_amount?: number | string | null;
@@ -761,14 +763,16 @@ function PaymentActions({
         size="sm"
         className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
         onClick={() => onEmail(payment)}
-        disabled={emailLoadingId === payment.id}
+        disabled={
+          emailLoadingId === payment.id || Boolean(payment.receipt_email_sent_at)
+        }
       >
         {emailLoadingId === payment.id ? (
           <Loader2 size={15} className="animate-spin" />
         ) : (
           <Mail size={15} />
         )}
-        Envoyer
+        {payment.receipt_email_sent_at ? "Envoyé" : "Envoyer"}
       </Button>
 
       <Button
@@ -862,14 +866,16 @@ function PaymentCard({
           variant="outline"
           className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
           onClick={() => onEmail(payment)}
-          disabled={emailLoadingId === payment.id}
+          disabled={
+            emailLoadingId === payment.id || Boolean(payment.receipt_email_sent_at)
+          }
         >
           {emailLoadingId === payment.id ? (
             <Loader2 size={15} className="animate-spin" />
           ) : (
             <Mail size={15} />
           )}
-          Envoyer
+          {payment.receipt_email_sent_at ? "Envoyé" : "Envoyer"}
         </Button>
         <Button
           variant="outline"

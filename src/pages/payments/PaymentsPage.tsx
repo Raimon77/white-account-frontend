@@ -7,6 +7,7 @@ import {
   Edit,
   FileText,
   Loader2,
+  Mail,
   Plus,
   Receipt,
   Search,
@@ -48,6 +49,7 @@ type Payment = {
   balance_due?: number | string | null;
   payment_status?: string | null;
   client_name?: string | null;
+  client_email?: string | null;
   client_phone?: string | null;
   created_at?: string | null;
 };
@@ -65,7 +67,7 @@ const emptyForm: PaymentFormData = {
   sale_id: "",
   payment_date: getTodayDate(),
   amount: "",
-  payment_method: "cash",
+  payment_method: "orange_money",
   reference: "",
   note: "",
 };
@@ -258,7 +260,9 @@ function PaymentsPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [receiptLoadingId, setReceiptLoadingId] = useState<string | null>(null);
+  const [emailLoadingId, setEmailLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
@@ -341,7 +345,7 @@ function PaymentsPage() {
       sale_id: payment.sale_id,
       payment_date: (payment.payment_date || getTodayDate()).slice(0, 10),
       amount: String(toNumber(payment.amount)),
-      payment_method: payment.payment_method || "cash",
+      payment_method: payment.payment_method || "orange_money",
       reference: payment.reference || "",
       note: payment.note || "",
     });
@@ -472,6 +476,37 @@ function PaymentsPage() {
     }
   }
 
+  async function handleSendReceipt(payment: Payment) {
+    let recipient = payment.client_email?.trim() || "";
+
+    if (!recipient) {
+      recipient =
+        window.prompt(
+          `Adresse email pour envoyer le reçu ${payment.receipt_number || "de paiement"} :`
+        )?.trim() || "";
+    }
+
+    if (!recipient) return;
+
+    try {
+      setEmailLoadingId(payment.id);
+      setError("");
+      setSuccess("");
+
+      const response = await api.post(
+        `/sale-payments/${payment.id}/send-receipt-email`,
+        { email: recipient }
+      );
+
+      setSuccess(response.data?.message || `Reçu envoyé à ${recipient}.`);
+      await loadData();
+    } catch (error) {
+      setError(getErrorMessage(error, "Impossible d’envoyer le reçu par email."));
+    } finally {
+      setEmailLoadingId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -557,6 +592,12 @@ function PaymentsPage() {
         </div>
       )}
 
+      {success && (
+        <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+          {success}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Liste des paiements</CardTitle>
@@ -636,8 +677,10 @@ function PaymentsPage() {
                             payment={payment}
                             deletingId={deletingId}
                             receiptLoadingId={receiptLoadingId}
+                            emailLoadingId={emailLoadingId}
                             onEdit={openEditModal}
                             onReceipt={handleReceiptPdf}
+                            onEmail={handleSendReceipt}
                             onDelete={handleDelete}
                           />
                         </td>
@@ -654,8 +697,10 @@ function PaymentsPage() {
                     payment={payment}
                     deletingId={deletingId}
                     receiptLoadingId={receiptLoadingId}
+                    emailLoadingId={emailLoadingId}
                     onEdit={openEditModal}
                     onReceipt={handleReceiptPdf}
+                    onEmail={handleSendReceipt}
                     onDelete={handleDelete}
                   />
                 ))}
@@ -684,15 +729,19 @@ function PaymentActions({
   payment,
   deletingId,
   receiptLoadingId,
+  emailLoadingId,
   onEdit,
   onReceipt,
+  onEmail,
   onDelete,
 }: {
   payment: Payment;
   deletingId: string | null;
   receiptLoadingId: string | null;
+  emailLoadingId: string | null;
   onEdit: (payment: Payment) => void;
   onReceipt: (payment: Payment) => void;
+  onEmail: (payment: Payment) => void;
   onDelete: (payment: Payment) => void;
 }) {
   return (
@@ -705,6 +754,21 @@ function PaymentActions({
       >
         <Edit size={15} />
         Modifier
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+        onClick={() => onEmail(payment)}
+        disabled={emailLoadingId === payment.id}
+      >
+        {emailLoadingId === payment.id ? (
+          <Loader2 size={15} className="animate-spin" />
+        ) : (
+          <Mail size={15} />
+        )}
+        Envoyer
       </Button>
 
       <Button
@@ -744,15 +808,19 @@ function PaymentCard({
   payment,
   deletingId,
   receiptLoadingId,
+  emailLoadingId,
   onEdit,
   onReceipt,
+  onEmail,
   onDelete,
 }: {
   payment: Payment;
   deletingId: string | null;
   receiptLoadingId: string | null;
+  emailLoadingId: string | null;
   onEdit: (payment: Payment) => void;
   onReceipt: (payment: Payment) => void;
+  onEmail: (payment: Payment) => void;
   onDelete: (payment: Payment) => void;
 }) {
   return (
@@ -785,10 +853,23 @@ function PaymentCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <Button variant="outline" className="gap-2" onClick={() => onEdit(payment)}>
           <Edit size={15} />
           Modifier
+        </Button>
+        <Button
+          variant="outline"
+          className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+          onClick={() => onEmail(payment)}
+          disabled={emailLoadingId === payment.id}
+        >
+          {emailLoadingId === payment.id ? (
+            <Loader2 size={15} className="animate-spin" />
+          ) : (
+            <Mail size={15} />
+          )}
+          Envoyer
         </Button>
         <Button
           variant="outline"

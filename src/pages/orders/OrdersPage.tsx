@@ -305,7 +305,7 @@ function OrdersPage() {
   const [convertFormData, setConvertFormData] = useState({
     sale_date: getTodayDate(),
     amount_paid: "0",
-    payment_method: "cash",
+    payment_method: "orange_money",
     subscription_label: "",
     next_subscription_date: "",
   });
@@ -592,7 +592,7 @@ function OrdersPage() {
     setConvertFormData({
       sale_date: getTodayDate(),
       amount_paid: String(order.total_amount || 0),
-      payment_method: "cash",
+      payment_method: "orange_money",
       subscription_label: "",
       next_subscription_date: "",
     });

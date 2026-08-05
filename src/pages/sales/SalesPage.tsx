@@ -15,6 +15,7 @@ import {
   Eye,
   FileText,
   Loader2,
+  Mail,
   Plus,
   Receipt,
   Search,
@@ -116,7 +117,7 @@ const emptyForm: SaleFormData = {
   client_id: "",
   sale_date: getTodayDate(),
   amount_paid: "0",
-  payment_method: "cash",
+  payment_method: "orange_money",
   observation: "",
   subscription_label: "",
   next_subscription_date: "",
@@ -306,8 +307,10 @@ function SalesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
   const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
+  const [emailLoadingId, setEmailLoadingId] = useState<string | null>(null);
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -440,7 +443,7 @@ function SalesPage() {
         client_id: details.sale.client_id || "",
         sale_date: (details.sale.sale_date || getTodayDate()).slice(0, 10),
         amount_paid: String(toNumber(details.sale.amount_paid)),
-        payment_method: "cash",
+        payment_method: "orange_money",
         observation: details.sale.observation || "",
         subscription_label: details.sale.subscription_label || "",
         next_subscription_date: details.sale.next_subscription_date
@@ -671,6 +674,36 @@ function SalesPage() {
     }
   }
 
+  async function handleSendInvoice(sale: Sale) {
+    let recipient = sale.client_email?.trim() || "";
+
+    if (!recipient) {
+      recipient =
+        window.prompt(
+          `Adresse email pour envoyer la facture ${getSaleNumber(sale)} :`
+        )?.trim() || "";
+    }
+
+    if (!recipient) return;
+
+    try {
+      setEmailLoadingId(sale.id);
+      setError("");
+      setSuccess("");
+
+      const response = await api.post(`/sales/${sale.id}/send-invoice-email`, {
+        email: recipient,
+      });
+
+      setSuccess(response.data?.message || `Facture envoyée à ${recipient}.`);
+      await loadData();
+    } catch (error) {
+      setError(getErrorMessage(error, "Impossible d’envoyer la facture par email."));
+    } finally {
+      setEmailLoadingId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -757,6 +790,12 @@ function SalesPage() {
       {error && (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+          {success}
         </div>
       )}
 
@@ -888,6 +927,21 @@ function SalesPage() {
                             <Button
                               variant="outline"
                               size="sm"
+                              className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+                              onClick={() => handleSendInvoice(sale)}
+                              disabled={emailLoadingId === sale.id}
+                            >
+                              {emailLoadingId === sale.id ? (
+                                <Loader2 size={15} className="animate-spin" />
+                              ) : (
+                                <Mail size={15} />
+                              )}
+                              Envoyer
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700 admin-only"
                               onClick={() => handleDelete(sale)}
                               disabled={deletingId === sale.id}
@@ -983,6 +1037,20 @@ function SalesPage() {
 
                       <Button
                         variant="outline"
+                        className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+                        onClick={() => handleSendInvoice(sale)}
+                        disabled={emailLoadingId === sale.id}
+                      >
+                        {emailLoadingId === sale.id ? (
+                          <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                          <Mail size={15} />
+                        )}
+                        Envoyer
+                      </Button>
+
+                      <Button
+                        variant="outline"
                         className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700 admin-only"
                         onClick={() => handleDelete(sale)}
                         disabled={deletingId === sale.id}
@@ -1027,6 +1095,8 @@ function SalesPage() {
             openEditModal(selectedDetails.sale);
           }}
           onPdf={() => handleGeneratePdf(selectedDetails.sale)}
+          onEmail={() => handleSendInvoice(selectedDetails.sale)}
+          emailLoading={emailLoadingId === selectedDetails.sale.id}
         />
       )}
     </div>
@@ -1465,11 +1535,15 @@ function SaleDetailsModal({
   onClose,
   onEdit,
   onPdf,
+  onEmail,
+  emailLoading,
 }: {
   details: SaleDetails;
   onClose: () => void;
   onEdit: () => void;
   onPdf: () => void;
+  onEmail: () => void;
+  emailLoading: boolean;
 }) {
   const sale = details.sale;
 
@@ -1572,6 +1646,21 @@ function SaleDetailsModal({
             <Button type="button" variant="outline" className="gap-2" onClick={onPdf}>
               <Download size={16} />
               Facture PDF
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+              onClick={onEmail}
+              disabled={emailLoading}
+            >
+              {emailLoading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Mail size={16} />
+              )}
+              Envoyer par email
             </Button>
 
             <Button

@@ -304,7 +304,7 @@ function QuotesPage() {
   const [convertFormData, setConvertFormData] = useState({
     sale_date: getTodayDate(),
     amount_paid: "0",
-    payment_method: "cash",
+    payment_method: "orange_money",
     subscription_label: "",
     next_subscription_date: "",
   });
@@ -596,7 +596,7 @@ function QuotesPage() {
     setConvertFormData({
       sale_date: getTodayDate(),
       amount_paid: String(quote.total_amount || 0),
-      payment_method: "cash",
+      payment_method: "orange_money",
       subscription_label: "",
       next_subscription_date: "",
     });

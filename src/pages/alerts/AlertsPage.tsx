@@ -28,9 +28,12 @@ type SubscriptionAlert = {
 type AlertResponse = {
   message: string;
   days_range: number;
+  scope: AlertScope;
   total: number;
   alerts: SubscriptionAlert[];
 };
+
+type AlertScope = "upcoming" | "expired" | "all";
 
 function getBackendMessage(data: unknown): string | null {
   if (typeof data === "string") return data.trim() || null;
@@ -90,6 +93,7 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState<SubscriptionAlert[]>([]);
   const [search, setSearch] = useState("");
   const [days, setDays] = useState(15);
+  const [scope, setScope] = useState<AlertScope>("upcoming");
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState("");
@@ -101,14 +105,16 @@ export default function AlertsPage() {
       setError("");
       setSuccess("");
 
-      const response = await api.get<AlertResponse>(`/alerts/subscriptions?days=${days}`);
+      const response = await api.get<AlertResponse>("/alerts/subscriptions", {
+        params: { days, scope },
+      });
       setAlerts(response.data.alerts || []);
     } catch (error) {
       setError(getErrorMessage(error, "Impossible de charger les alertes."));
     } finally {
       setLoading(false);
     }
-  }, [days]);
+  }, [days, scope]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => void loadAlerts(), 0);
@@ -207,17 +213,29 @@ export default function AlertsPage() {
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
-                value={days}
-                onChange={(e) => setDays(Number(e.target.value))}
+                value={scope}
+                onChange={(e) => setScope(e.target.value as AlertScope)}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               >
-                <option value={7}>Dans les 7 jours</option>
-                <option value={15}>Dans les 15 jours</option>
-                <option value={30}>Dans les 30 jours</option>
-                <option value={90}>Dans les 90 jours</option>
+                <option value="upcoming">À venir</option>
+                <option value="expired">Expirées</option>
+                <option value="all">Tout l'historique</option>
               </select>
+
+              {scope === "upcoming" && (
+                <select
+                  value={days}
+                  onChange={(e) => setDays(Number(e.target.value))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value={7}>Dans les 7 jours</option>
+                  <option value={15}>Dans les 15 jours</option>
+                  <option value={30}>Dans les 30 jours</option>
+                  <option value={90}>Dans les 90 jours</option>
+                </select>
+              )}
             </div>
           </div>
         </div>

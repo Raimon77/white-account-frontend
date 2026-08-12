@@ -862,9 +862,9 @@ function PurchaseModal({
   onRemoveLine,
 }: PurchaseModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-3 sm:p-6 lg:p-10">
+      <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
             <h2 className="text-xl font-bold text-slate-950">
               {mode === "edit" ? "Modifier l’achat" : "Nouvel achat"}
@@ -887,14 +887,14 @@ function PurchaseModal({
 
         <form
           onSubmit={onSubmit}
-          className="max-h-[calc(92vh-90px)] overflow-y-auto px-6 py-5"
+          className="max-h-[calc(100dvh-6.5rem)] overflow-y-auto px-5 py-4 sm:max-h-[calc(100dvh-8rem)]"
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             <FormField label="Fournisseur" required>
               <select
                 value={formData.supplier_id}
                 onChange={(event) => onChange("supplier_id", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               >
                 <option value="">Choisir un fournisseur</option>
                 {suppliers.map((supplier) => (
@@ -910,25 +910,25 @@ function PurchaseModal({
                 type="date"
                 value={formData.purchase_date}
                 onChange={(event) => onChange("purchase_date", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <FormField label="Observation">
               <textarea
                 value={formData.observation}
                 onChange={(event) => onChange("observation", event.target.value)}
                 rows={2}
                 placeholder="Ex : Achat de réapprovisionnement"
-                className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+          <div className="mt-4 rounded-2xl border border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-slate-950">Produits achetés</p>
                 <p className="text-sm text-slate-500">
@@ -947,7 +947,7 @@ function PurchaseModal({
               </Button>
             </div>
 
-            <div className="space-y-3 p-4">
+            <div className="space-y-2 p-3">
               {formData.items.map((item, index) => {
                 const lineTotal =
                   Number(item.quantity || 0) * Number(item.unit_price || 0);
@@ -955,7 +955,7 @@ function PurchaseModal({
                 return (
                   <div
                     key={index}
-                    className="grid gap-3 rounded-2xl bg-slate-50 p-4 lg:grid-cols-[1.5fr_0.6fr_0.8fr_0.8fr_auto]"
+                    className="grid gap-2 rounded-xl bg-slate-50 p-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(5rem,0.5fr)_minmax(7rem,0.7fr)_minmax(7rem,0.75fr)_auto]"
                   >
                     <FormField label="Produit" small>
                       <select
@@ -1009,19 +1009,19 @@ function PurchaseModal({
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col justify-between gap-4 rounded-3xl bg-slate-950 p-5 text-white md:flex-row md:items-center">
+          <div className="mt-4 flex flex-col justify-between gap-3 rounded-2xl bg-slate-950 p-4 text-white md:flex-row md:items-center">
             <div>
               <p className="text-sm text-slate-300">Total de l’achat</p>
               <p className="mt-1 text-2xl font-bold">{formatMoney(formTotal)}</p>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={saving}
-                className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto"
               >
                 Annuler
               </Button>
@@ -1029,7 +1029,7 @@ function PurchaseModal({
               <Button
                 type="submit"
                 disabled={saving}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                className="w-full gap-2 bg-blue-600 hover:bg-blue-700 sm:w-auto"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 {mode === "edit" ? "Enregistrer les modifications" : "Enregistrer l’achat"}

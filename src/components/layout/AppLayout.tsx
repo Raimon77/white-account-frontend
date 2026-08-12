@@ -166,7 +166,7 @@ function AppLayout() {
       </aside>
 
       {/* Main */}
-      <main className="relative z-10 min-w-0 lg:pl-72">
+      <main className="relative min-w-0 lg:pl-72">
         <Topbar user={user} />
 
         <div className="app-page-scroll min-h-[calc(100vh-81px)] overflow-x-auto p-4 md:p-6 lg:p-7">

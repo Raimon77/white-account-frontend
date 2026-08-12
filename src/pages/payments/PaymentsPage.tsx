@@ -483,6 +483,7 @@ function PaymentsPage() {
 
   async function handleSendReceipt(payment: Payment) {
     let recipient = payment.client_email?.trim() || "";
+    const resend = Boolean(payment.receipt_email_sent_at);
 
     if (!recipient) {
       recipient =
@@ -493,6 +494,15 @@ function PaymentsPage() {
 
     if (!recipient) return;
 
+    if (
+      resend &&
+      !window.confirm(
+        `Renvoyer le reçu ${payment.receipt_number || "de paiement"} à ${recipient} ?`
+      )
+    ) {
+      return;
+    }
+
     try {
       setEmailLoadingId(payment.id);
       setError("");
@@ -500,7 +510,7 @@ function PaymentsPage() {
 
       const response = await api.post(
         `/sale-payments/${payment.id}/send-receipt-email`,
-        { email: recipient }
+        { email: recipient, resend }
       );
 
       setSuccess(response.data?.message || `Reçu envoyé à ${recipient}.`);
@@ -767,16 +777,14 @@ function PaymentActions({
         size="sm"
         className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
         onClick={() => onEmail(payment)}
-        disabled={
-          emailLoadingId === payment.id || Boolean(payment.receipt_email_sent_at)
-        }
+        disabled={emailLoadingId === payment.id}
       >
         {emailLoadingId === payment.id ? (
           <Loader2 size={15} className="animate-spin" />
         ) : (
           <Mail size={15} />
         )}
-        {payment.receipt_email_sent_at ? "Envoyé" : "Envoyer"}
+        {payment.receipt_email_sent_at ? "Renvoyer" : "Envoyer"}
       </Button>
 
       <Button
@@ -870,16 +878,14 @@ function PaymentCard({
           variant="outline"
           className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
           onClick={() => onEmail(payment)}
-          disabled={
-            emailLoadingId === payment.id || Boolean(payment.receipt_email_sent_at)
-          }
+          disabled={emailLoadingId === payment.id}
         >
           {emailLoadingId === payment.id ? (
             <Loader2 size={15} className="animate-spin" />
           ) : (
             <Mail size={15} />
           )}
-          {payment.receipt_email_sent_at ? "Envoyé" : "Envoyer"}
+          {payment.receipt_email_sent_at ? "Renvoyer" : "Envoyer"}
         </Button>
         <Button
           variant="outline"

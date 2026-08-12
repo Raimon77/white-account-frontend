@@ -1302,10 +1302,10 @@ function QuotesPage() {
 
       {/* Add / Edit Form Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-sm sm:p-6 lg:p-10">
           <form
             onSubmit={handleSubmitForm}
-            className="w-full max-w-3xl rounded-2xl border bg-white p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto"
+            className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl space-y-3 overflow-y-auto rounded-2xl border bg-white p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:p-5"
           >
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-lg font-bold text-slate-900">
@@ -1320,7 +1320,7 @@ function QuotesPage() {
               </button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 text-sm">
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700">Client</label>
                 <select
@@ -1338,7 +1338,7 @@ function QuotesPage() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-700">Date Devis</label>
                   <input
@@ -1386,7 +1386,7 @@ function QuotesPage() {
 
             {/* Form Items Grid */}
             <div className="space-y-2 border-t pt-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h4 className="text-sm font-bold text-slate-900">Articles du devis</h4>
                 <Button
                   type="button"
@@ -1397,10 +1397,10 @@ function QuotesPage() {
                 </Button>
               </div>
 
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
                 {formData.items.map((line, index) => (
-                  <div key={index} className="flex gap-2 items-end border p-3 rounded-xl bg-slate-50/50">
-                    <div className="flex-1 space-y-1">
+                  <div key={index} className="grid gap-2 rounded-xl border bg-slate-50/50 p-3 sm:grid-cols-[minmax(0,1fr)_5rem_7rem_7rem_auto] sm:items-end">
+                    <div className="min-w-0 space-y-1">
                       <label className="text-[10px] font-semibold text-slate-500">Produit</label>
                       <select
                         value={line.product_id}
@@ -1414,7 +1414,7 @@ function QuotesPage() {
                       </select>
                     </div>
 
-                    <div className="w-20 space-y-1">
+                    <div className="space-y-1">
                       <label className="text-[10px] font-semibold text-slate-500">Quantité</label>
                       <input
                         type="number"
@@ -1426,7 +1426,7 @@ function QuotesPage() {
                       />
                     </div>
 
-                    <div className="w-28 space-y-1">
+                    <div className="space-y-1">
                       <label className="text-[10px] font-semibold text-slate-500">Prix unitaire (FCFA)</label>
                       <input
                         type="number"
@@ -1438,7 +1438,7 @@ function QuotesPage() {
                       />
                     </div>
 
-                    <div className="w-28 space-y-1 text-right">
+                    <div className="space-y-1 text-right">
                       <p className="text-[10px] font-semibold text-slate-400">Total Ligne</p>
                       <p className="py-1.5 px-2 text-xs font-bold text-slate-900 bg-slate-100 rounded-lg">
                         {formatMoney(Number(line.quantity || 0) * Number(line.unit_price || 0))}
@@ -1449,7 +1449,7 @@ function QuotesPage() {
                       type="button"
                       disabled={formData.items.length <= 1}
                       onClick={() => handleRemoveLine(index)}
-                      className="p-2 border rounded-lg hover:bg-red-50 hover:text-red-600 disabled:opacity-30 text-slate-400 admin-only"
+                      className="justify-self-end rounded-lg border p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-30 admin-only"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -1459,7 +1459,7 @@ function QuotesPage() {
             </div>
 
             {/* Notes & Summary */}
-            <div className="grid gap-4 sm:grid-cols-2 border-t pt-3">
+            <div className="grid gap-3 border-t pt-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700">Note interne</label>
                 <textarea
@@ -1471,7 +1471,7 @@ function QuotesPage() {
                 />
               </div>
 
-              <div className="flex flex-col justify-end items-end p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+              <div className="flex flex-col items-end justify-end space-y-1.5 rounded-xl border border-slate-100 bg-slate-50 p-3">
                 <p className="text-xs text-slate-500">Montant total calculé</p>
                 <p className="text-2xl font-bold text-slate-900">{formatMoney(formTotal)}</p>
               </div>

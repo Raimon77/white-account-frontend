@@ -680,6 +680,7 @@ function SalesPage() {
 
   async function handleSendInvoice(sale: Sale) {
     let recipient = sale.client_email?.trim() || "";
+    const resend = Boolean(sale.invoice_email_sent_at);
 
     if (!recipient) {
       recipient =
@@ -690,6 +691,15 @@ function SalesPage() {
 
     if (!recipient) return;
 
+    if (
+      resend &&
+      !window.confirm(
+        `Renvoyer la facture ${getSaleNumber(sale)} à ${recipient} ?`
+      )
+    ) {
+      return;
+    }
+
     try {
       setEmailLoadingId(sale.id);
       setError("");
@@ -697,6 +707,7 @@ function SalesPage() {
 
       const response = await api.post(`/sales/${sale.id}/send-invoice-email`, {
         email: recipient,
+        resend,
       });
 
       setSuccess(response.data?.message || `Facture envoyée à ${recipient}.`);
@@ -934,16 +945,14 @@ function SalesPage() {
                               size="sm"
                               className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
                               onClick={() => handleSendInvoice(sale)}
-                              disabled={
-                                emailLoadingId === sale.id || Boolean(sale.invoice_email_sent_at)
-                              }
+                              disabled={emailLoadingId === sale.id}
                             >
                               {emailLoadingId === sale.id ? (
                                 <Loader2 size={15} className="animate-spin" />
                               ) : (
                                 <Mail size={15} />
                               )}
-                              {sale.invoice_email_sent_at ? "Envoyée" : "Envoyer"}
+                              {sale.invoice_email_sent_at ? "Renvoyer" : "Envoyer"}
                             </Button>
 
                             <Button
@@ -1046,16 +1055,14 @@ function SalesPage() {
                         variant="outline"
                         className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
                         onClick={() => handleSendInvoice(sale)}
-                        disabled={
-                          emailLoadingId === sale.id || Boolean(sale.invoice_email_sent_at)
-                        }
+                        disabled={emailLoadingId === sale.id}
                       >
                         {emailLoadingId === sale.id ? (
                           <Loader2 size={15} className="animate-spin" />
                         ) : (
                           <Mail size={15} />
                         )}
-                        {sale.invoice_email_sent_at ? "Envoyée" : "Envoyer"}
+                        {sale.invoice_email_sent_at ? "Renvoyer" : "Envoyer"}
                       </Button>
 
                       <Button
@@ -1270,9 +1277,9 @@ function SaleModal({
   onRemoveLine,
 }: SaleModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-3 sm:p-6 lg:p-10">
+      <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
             <h2 className="text-xl font-bold text-slate-950">
               {mode === "edit" ? "Modifier la vente" : "Nouvelle vente"}
@@ -1294,14 +1301,14 @@ function SaleModal({
 
         <form
           onSubmit={onSubmit}
-          className="max-h-[calc(92vh-90px)] overflow-y-auto px-6 py-5"
+          className="max-h-[calc(100dvh-6.5rem)] overflow-y-auto px-5 py-4 sm:max-h-[calc(100dvh-8rem)]"
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             <FormField label="Client" required>
               <select
                 value={formData.client_id}
                 onChange={(event) => onChange("client_id", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               >
                 <option value="">Choisir un client</option>
                 {clients.map((client) => (
@@ -1317,19 +1324,19 @@ function SaleModal({
                 type="date"
                 value={formData.sale_date}
                 onChange={(event) => onChange("sale_date", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
           </div>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
             <FormField label="Montant payé">
               <input
                 type="number"
                 min="0"
                 value={formData.amount_paid}
                 onChange={(event) => onChange("amount_paid", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
 
@@ -1339,7 +1346,7 @@ function SaleModal({
                 onChange={(event) =>
                   onChange("payment_method", event.target.value)
                 }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               >
                 <option value="cash">Espèces</option>
                 <option value="wave">Wave</option>
@@ -1352,7 +1359,7 @@ function SaleModal({
           </div>
 
           {mode === "edit" && (
-            <div className="mt-4 rounded-2xl bg-orange-50 p-4 text-sm text-orange-800">
+            <div className="mt-3 rounded-xl bg-orange-50 p-3 text-sm text-orange-800">
               Si la vente possède déjà des paiements liés, la modification de la
               vente recalcule le solde selon les paiements existants. La
               correction détaillée des paiements se fera dans le module
@@ -1360,7 +1367,7 @@ function SaleModal({
             </div>
           )}
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
             <FormField label="Libellé abonnement">
               <input
                 value={formData.subscription_label}
@@ -1368,7 +1375,7 @@ function SaleModal({
                   onChange("subscription_label", event.target.value)
                 }
                 placeholder="Ex : Renouvellement Netflix"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
 
@@ -1379,25 +1386,25 @@ function SaleModal({
                 onChange={(event) =>
                   onChange("next_subscription_date", event.target.value)
                 }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <FormField label="Observation">
               <textarea
                 value={formData.observation}
                 onChange={(event) => onChange("observation", event.target.value)}
                 rows={2}
                 placeholder="Ex : Remise client ou note interne"
-                className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </FormField>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+          <div className="mt-4 rounded-2xl border border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-slate-950">Produits vendus</p>
                 <p className="text-sm text-slate-500">
@@ -1417,7 +1424,7 @@ function SaleModal({
               </Button>
             </div>
 
-            <div className="space-y-3 p-4">
+            <div className="space-y-2 p-3">
               {formData.items.map((item, index) => {
                 const product = products.find(
                   (product) => product.id === item.product_id
@@ -1434,7 +1441,7 @@ function SaleModal({
                 return (
                   <div
                     key={index}
-                    className="grid gap-3 rounded-2xl bg-slate-50 p-4 xl:grid-cols-[1.5fr_0.5fr_0.7fr_0.7fr_0.7fr_auto]"
+                    className="grid gap-2 rounded-xl bg-slate-50 p-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(4.5rem,0.45fr)_minmax(6.5rem,0.7fr)_minmax(6.5rem,0.7fr)_minmax(6.5rem,0.7fr)_auto]"
                   >
                     <FormField label="Produit" small>
                       <select
@@ -1501,7 +1508,7 @@ function SaleModal({
             </div>
           </div>
 
-          <div className="mt-5 grid gap-4 rounded-3xl bg-slate-950 p-5 text-white md:grid-cols-4">
+          <div className="mt-4 grid gap-3 rounded-2xl bg-slate-950 p-4 text-white sm:grid-cols-2 lg:grid-cols-4">
             <TotalBox label="Total vente" value={formatMoney(formTotal)} />
             <TotalBox label="Bénéfice estimé" value={formatMoney(formProfit)} />
             <TotalBox
@@ -1510,13 +1517,13 @@ function SaleModal({
             />
             <TotalBox label="Solde" value={formatMoney(formBalance)} />
 
-            <div className="flex justify-end gap-3 md:col-span-4">
+            <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:justify-end lg:col-span-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={saving}
-                className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto"
               >
                 Annuler
               </Button>
@@ -1524,7 +1531,7 @@ function SaleModal({
               <Button
                 type="submit"
                 disabled={saving}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                className="w-full gap-2 bg-blue-600 hover:bg-blue-700 sm:w-auto"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 {mode === "edit"
@@ -1662,14 +1669,14 @@ function SaleDetailsModal({
               variant="outline"
               className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
               onClick={onEmail}
-              disabled={emailLoading || Boolean(sale.invoice_email_sent_at)}
+              disabled={emailLoading}
             >
               {emailLoading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <Mail size={16} />
               )}
-              {sale.invoice_email_sent_at ? "Facture déjà envoyée" : "Envoyer par email"}
+              {sale.invoice_email_sent_at ? "Renvoyer la facture" : "Envoyer par email"}
             </Button>
 
             <Button

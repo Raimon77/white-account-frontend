@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Plus, UserCheck, UserX } from "lucide-react";
+import { Loader2, Plus, Trash2, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/api/api";
@@ -26,6 +26,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 export default function UsersSettings() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ full_name: "", email: "", password: "", role: "employee" });
 
   useEffect(() => {
@@ -61,6 +62,24 @@ export default function UsersSettings() {
       fetchUsers();
     } catch (error: unknown) {
       alert(getApiErrorMessage(error, "Erreur de statut"));
+    }
+  }
+
+  async function handleDeleteUser(user: UserType) {
+    const confirmed = window.confirm(
+      `Supprimer définitivement le compte de ${user.full_name} ?\n\nSon accès sera supprimé immédiatement. L'historique des opérations sera conservé.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(user.id);
+      await api.delete(`/users/${user.id}`);
+      await fetchUsers();
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, "Erreur lors de la suppression"));
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -127,17 +146,35 @@ export default function UsersSettings() {
                 <p className="text-xs text-slate-500">{u.email} • <span className="capitalize font-semibold text-blue-600">{u.role}</span></p>
               </div>
             </div>
-            <div>
+            <div className="flex flex-wrap gap-2">
               {u.role !== 'admin' && (
-                <Button 
-                  variant={u.is_active ? "destructive" : "outline"} 
-                  size="sm" 
-                  className={!u.is_active ? "text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100" : ""}
-                  onClick={() => handleToggleStatus(u.id, u.is_active)}
-                >
-                  {u.is_active ? <UserX size={14} className="mr-1.5"/> : <UserCheck size={14} className="mr-1.5"/>}
-                  {u.is_active ? "Désactiver" : "Réactiver"}
-                </Button>
+                <>
+                  <Button
+                    variant={u.is_active ? "destructive" : "outline"}
+                    size="sm"
+                    className={!u.is_active ? "text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100" : ""}
+                    onClick={() => handleToggleStatus(u.id, u.is_active)}
+                    disabled={deletingId === u.id}
+                  >
+                    {u.is_active ? <UserX size={14} className="mr-1.5"/> : <UserCheck size={14} className="mr-1.5"/>}
+                    {u.is_active ? "Désactiver" : "Réactiver"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => handleDeleteUser(u)}
+                    disabled={deletingId === u.id}
+                  >
+                    {deletingId === u.id ? (
+                      <Loader2 size={14} className="mr-1.5 animate-spin" />
+                    ) : (
+                      <Trash2 size={14} className="mr-1.5" />
+                    )}
+                    Supprimer
+                  </Button>
+                </>
               )}
             </div>
           </div>

@@ -16,9 +16,9 @@ import ProductsPage from "@/pages/products/ProductsPage";
 import QuotesPage from "@/pages/quotes/QuotesPage";
 import RefundsPage from "@/pages/refunds/RefundsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
-import PurchasesPage from "@/pages/purchases/PurchasesPage";
 import SalesPage from "@/pages/sales/SalesPage";
 import AlertsPage from "@/pages/alerts/AlertsPage";
+import AccountAccessPage from "@/pages/account-access/AccountAccessPage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import { hasActiveSession } from "@/auth/session";
 import UpdateManager from "@/components/updater/UpdateManager";
@@ -60,7 +60,9 @@ function App() {
 
           <Route path="/products" element={<ProductsPage />} />
 
-          <Route path="/purchases" element={<PurchasesPage />} />
+          <Route path="/purchases" element={<Navigate to="/expenses" replace />} />
+
+          <Route path="/account-access" element={<AccountAccessPage />} />
 
           <Route path="/sales" element={<SalesPage />} />
 

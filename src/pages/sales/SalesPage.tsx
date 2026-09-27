@@ -52,6 +52,7 @@ type Product = {
   purchase_price?: number | string | null;
   purchase_cost?: number | string | null;
   stock_quantity?: number | string | null;
+  track_stock?: boolean;
 };
 
 type Sale = {
@@ -631,7 +632,7 @@ function SalesPage() {
 
   async function handleDelete(sale: Sale) {
     const confirmed = window.confirm(
-      `Supprimer la vente "${getSaleNumber(sale)}" ?\n\nLe stock sera restauré automatiquement. Les paiements et avoirs liés seront aussi supprimés.`
+      `Supprimer la vente "${getSaleNumber(sale)}" ?\n\nLes paiements et avoirs liés seront aussi supprimés.`
     );
 
     if (!confirmed) return;
@@ -647,7 +648,7 @@ function SalesPage() {
       setError(
         getErrorMessage(
           error,
-          "Impossible de supprimer cette vente. Vérifie le stock ou les avoirs liés."
+          "Impossible de supprimer cette vente. Vérifie les paiements ou les avoirs liés."
         )
       );
     } finally {
@@ -1454,8 +1455,9 @@ function SaleModal({
                         <option value="">Choisir un produit</option>
                         {products.map((product) => (
                           <option key={product.id} value={product.id}>
-                            {product.reference} - {product.name} | Stock{" "}
-                            {toNumber(product.stock_quantity)}
+                            {product.reference} - {product.name} | {product.track_stock === false
+                              ? "Service sans stock"
+                              : `Stock ${toNumber(product.stock_quantity)}`}
                           </option>
                         ))}
                       </select>

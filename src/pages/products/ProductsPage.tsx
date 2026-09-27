@@ -32,6 +32,7 @@ type Product = {
   stock_quantity?: number | string | null;
   alert_threshold?: number | string | null;
   created_at?: string;
+  track_stock?: boolean;
 };
 
 type ProductFormData = {
@@ -122,20 +123,10 @@ function ProductsPage() {
     });
   }, [products, search]);
 
-  const lowStockProducts = useMemo(() => {
-    return products.filter((product) => {
-      const stock = toNumber(product.stock_quantity);
-      const threshold = toNumber(product.alert_threshold);
-
-      return threshold > 0 && stock <= threshold;
-    });
-  }, [products]);
-
-  const totalStockValue = useMemo(() => {
-    return products.reduce((total, product) => {
-      return total + toNumber(product.stock_quantity) * getPurchasePrice(product);
-    }, 0);
-  }, [products]);
+  const serviceProducts = useMemo(
+    () => products.filter((product) => product.track_stock === false),
+    [products]
+  );
 
   function openCreateModal() {
     setEditingProduct(null);
@@ -193,10 +184,11 @@ function ProductsPage() {
       const payload = {
         reference: formData.reference.trim(),
         name: formData.name.trim(),
-        purchase_price: Number(formData.purchase_price || 0),
+        purchase_price: 0,
         sale_price: Number(formData.sale_price || 0),
-        stock_quantity: Number(formData.stock_quantity || 0),
-        alert_threshold: Number(formData.alert_threshold || 0),
+        stock_quantity: 0,
+        alert_threshold: 0,
+        track_stock: false,
       };
 
       if (editingProduct) {
@@ -252,7 +244,7 @@ function ProductsPage() {
           <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
               <div className="mb-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                Gestion du stock
+                Catalogue de services
               </div>
 
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
@@ -270,7 +262,7 @@ function ProductsPage() {
               className="gap-2 bg-blue-600 hover:bg-blue-700"
             >
               <Plus size={18} />
-              Nouveau produit
+              Nouveau service
             </Button>
           </div>
         </div>
@@ -286,16 +278,16 @@ function ProductsPage() {
         />
 
         <StatCard
-          title="Alertes stock"
-          value={String(lowStockProducts.length)}
+          title="Services sans stock"
+          value={String(serviceProducts.length)}
           icon={AlertTriangle}
           colorClassName="bg-orange-50 text-orange-600"
-          danger={lowStockProducts.length > 0}
+          danger={false}
         />
 
         <StatCard
-          title="Valeur stock achat"
-          value={formatMoney(totalStockValue)}
+          title="Produits physiques"
+          value={String(products.length - serviceProducts.length)}
           icon={Boxes}
           colorClassName="bg-green-50 text-green-700"
         />
@@ -362,7 +354,7 @@ function ProductsPage() {
                   <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Produit</th>
-                      <th className="px-4 py-3 text-right">Prix achat</th>
+                      <th className="px-4 py-3 text-right">Type</th>
                       <th className="px-4 py-3 text-right">Prix vente</th>
                       <th className="px-4 py-3 text-right">Stock</th>
                       <th className="px-4 py-3 text-right">Seuil</th>
@@ -397,7 +389,7 @@ function ProductsPage() {
                           </td>
 
                           <td className="px-4 py-4 text-right font-medium text-slate-700">
-                            {formatMoney(getPurchasePrice(product))}
+                            {product.track_stock === false ? "Service" : "Produit"}
                           </td>
 
                           <td className="px-4 py-4 text-right font-semibold text-green-700">
@@ -405,15 +397,15 @@ function ProductsPage() {
                           </td>
 
                           <td className="px-4 py-4 text-right font-bold text-slate-950">
-                            {stock}
+                            {product.track_stock === false ? "—" : stock}
                           </td>
 
                           <td className="px-4 py-4 text-right text-slate-600">
-                            {threshold}
+                            {product.track_stock === false ? "—" : threshold}
                           </td>
 
                           <td className="px-4 py-4 text-right">
-                            <StockStatus lowStock={lowStock} />
+                            <StockStatus lowStock={lowStock} tracked={product.track_stock !== false} />
                           </td>
 
                           <td className="px-4 py-4">
@@ -479,20 +471,20 @@ function ProductsPage() {
                               </p>
                             </div>
 
-                            <StockStatus lowStock={lowStock} />
+                            <StockStatus lowStock={lowStock} tracked={product.track_stock !== false} />
                           </div>
 
                           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                             <InfoBox
-                              label="Prix achat"
-                              value={formatMoney(getPurchasePrice(product))}
+                              label="Type"
+                              value={product.track_stock === false ? "Service" : "Produit"}
                             />
                             <InfoBox
                               label="Prix vente"
                               value={formatMoney(getSalePrice(product))}
                             />
-                            <InfoBox label="Stock" value={String(stock)} />
-                            <InfoBox label="Seuil" value={String(threshold)} />
+                            {product.track_stock !== false && <InfoBox label="Stock" value={String(stock)} />}
+                            {product.track_stock !== false && <InfoBox label="Seuil" value={String(threshold)} />}
                           </div>
                         </div>
                       </div>
@@ -581,7 +573,10 @@ function StatCard({
   );
 }
 
-function StockStatus({ lowStock }: { lowStock: boolean }) {
+function StockStatus({ lowStock, tracked }: { lowStock: boolean; tracked: boolean }) {
+  if (!tracked) {
+    return <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">Sans stock</span>;
+  }
   return lowStock ? (
     <span className="inline-flex rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
       Stock bas
@@ -649,12 +644,12 @@ function ProductModal({
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
             <h2 className="text-xl font-bold text-slate-950">
-              {editingProduct ? "Modifier le produit" : "Nouveau produit"}
+              {editingProduct ? "Modifier le service" : "Nouveau service"}
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               {editingProduct
-                ? "Mettez à jour les informations du produit."
-                : "Ajoutez un produit à votre stock commercial."}
+                ? "Mettez à jour les informations du service."
+                : "Ajoutez un abonnement vendu sans gestion de stock."}
             </p>
           </div>
 
@@ -696,37 +691,16 @@ function ProductModal({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div>
             <NumberInput
-              label="Prix d'achat"
-              value={formData.purchase_price}
-              onChange={(value) => onChange("purchase_price", value)}
-            />
-
-            <NumberInput
-              label="Prix de vente"
+              label="Prix de vente par défaut"
               value={formData.sale_price}
               onChange={(value) => onChange("sale_price", value)}
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <NumberInput
-              label="Stock actuel"
-              value={formData.stock_quantity}
-              onChange={(value) => onChange("stock_quantity", value)}
-            />
-
-            <NumberInput
-              label="Seuil d'alerte"
-              value={formData.alert_threshold}
-              onChange={(value) => onChange("alert_threshold", value)}
-            />
-          </div>
-
           <div className="rounded-2xl bg-blue-50 p-4 text-sm text-blue-800">
-            Le seuil d’alerte permet d’identifier automatiquement les produits
-            avec un stock faible.
+            Les ventes de ce service ne nécessitent aucun achat préalable et ne modifient aucun stock.
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">

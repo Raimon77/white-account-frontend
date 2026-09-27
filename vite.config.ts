@@ -4,6 +4,9 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  base: process.env.VITE_DEPLOY_TARGET === "github-pages"
+    ? "/white-account-frontend/"
+    : "/",
   plugins: [react(), tailwindcss()],
   clearScreen: false,
   resolve: {

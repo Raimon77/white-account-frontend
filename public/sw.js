@@ -1,5 +1,12 @@
-const STATIC_CACHE = "white-account-static-v1";
-const APP_SHELL = ["/", "/index.html", "/manifest.webmanifest", "/logo.png", "/favicon.svg"];
+const STATIC_CACHE = "white-account-static-v2";
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
+const APP_SHELL = [
+  SCOPE_PATH,
+  `${SCOPE_PATH}index.html`,
+  `${SCOPE_PATH}manifest.webmanifest`,
+  `${SCOPE_PATH}logo.png`,
+  `${SCOPE_PATH}favicon.svg`,
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(APP_SHELL)));
@@ -27,7 +34,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request).catch(async () => {
         const cache = await caches.open(STATIC_CACHE);
-        return (await cache.match("/index.html")) || Response.error();
+        return (await cache.match(`${SCOPE_PATH}index.html`)) || Response.error();
       })
     );
     return;

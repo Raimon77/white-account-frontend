@@ -29,7 +29,7 @@ function App() {
   return (
     <>
       <UpdateManager />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route
           path="/"

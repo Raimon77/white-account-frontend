@@ -1277,8 +1277,26 @@ function SaleModal({
   onAddLine,
   onRemoveLine,
 }: SaleModalProps) {
+  const selectedClient = clients.find((client) => client.id === formData.client_id);
+  const selectedClientName = selectedClient?.name || "";
+  const [clientSearch, setClientSearch] = useState(selectedClientName);
+  const [clientResultsOpen, setClientResultsOpen] = useState(false);
+
+  const filteredClients = useMemo(() => {
+    const keyword = clientSearch.trim().toLowerCase();
+    if (!keyword) return clients.slice(0, 10);
+
+    return clients
+      .filter((client) =>
+        [client.name, client.phone, client.email]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(keyword))
+      )
+      .slice(0, 10);
+  }, [clientSearch, clients]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-3 sm:p-6 lg:p-10">
+    <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 sm:items-center sm:p-6 lg:p-10">
       <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
@@ -1291,33 +1309,97 @@ function SaleModal({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="submit"
+              form="sale-form"
+              disabled={saving}
+              className="bg-blue-600 px-3 hover:bg-blue-700 sm:hidden"
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : "Enregistrer"}
+            </Button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <form
+          id="sale-form"
           onSubmit={onSubmit}
           className="max-h-[calc(100dvh-6.5rem)] overflow-y-auto px-5 py-4 sm:max-h-[calc(100dvh-8rem)]"
         >
           <div className="grid gap-3 md:grid-cols-2">
             <FormField label="Client" required>
-              <select
-                value={formData.client_id}
-                onChange={(event) => onChange("client_id", event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+              <div
+                className="relative"
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    setClientResultsOpen(false);
+                  }
+                }}
               >
-                <option value="">Choisir un client</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
+                <Search className="absolute left-3 top-3 text-slate-400" size={17} />
+                <input
+                  value={clientSearch}
+                  onFocus={() => setClientResultsOpen(true)}
+                  onChange={(event) => {
+                    setClientSearch(event.target.value);
+                    setClientResultsOpen(true);
+                    if (formData.client_id) onChange("client_id", "");
+                  }}
+                  required
+                  autoComplete="off"
+                  placeholder="Tapez une lettre, un nom ou un numéro..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-9 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                />
+                {clientSearch && (
+                  <button
+                    type="button"
+                    aria-label="Effacer le client"
+                    onClick={() => {
+                      setClientSearch("");
+                      onChange("client_id", "");
+                      setClientResultsOpen(true);
+                    }}
+                    className="absolute right-2 top-2 rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+                {clientResultsOpen && (
+                  <div className="absolute z-40 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+                    {filteredClients.length === 0 ? (
+                      <p className="px-3 py-3 text-sm text-slate-500">Aucun client trouvé.</p>
+                    ) : filteredClients.map((client) => (
+                      <button
+                        key={client.id}
+                        type="button"
+                        onClick={() => {
+                          onChange("client_id", client.id);
+                          setClientSearch(client.name);
+                          setClientResultsOpen(false);
+                        }}
+                        className="block w-full rounded-lg px-3 py-2 text-left hover:bg-blue-50"
+                      >
+                        <span className="block text-sm font-semibold text-slate-900">{client.name}</span>
+                        {(client.phone || client.email) && (
+                          <span className="block truncate text-xs text-slate-500">
+                            {[client.phone, client.email].filter(Boolean).join(" · ")}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {clientSearch && !formData.client_id && !clientResultsOpen && (
+                  <p className="mt-1 text-xs text-orange-600">Sélectionnez le client dans la liste.</p>
+                )}
+              </div>
             </FormField>
 
             <FormField label="Date de vente">

@@ -68,6 +68,7 @@ const emptyForm: ExpenseFormData = {
 };
 
 const CATEGORIES = [
+  "Abonnement compte",
   "Loyer",
   "Salaires",
   "Marketing & Publicité",

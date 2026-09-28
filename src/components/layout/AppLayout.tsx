@@ -119,7 +119,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="aurora-app-shell relative min-h-screen overflow-x-hidden text-slate-950">
+    <div className="aurora-app-shell relative min-h-[100dvh] overflow-x-hidden text-slate-950">
       <div className="aurora-app-glow aurora-app-glow-blue" aria-hidden="true" />
       <div className="aurora-app-glow aurora-app-glow-orange" aria-hidden="true" />
 
@@ -150,7 +150,7 @@ function AppLayout() {
       {/* Overlay mobile */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/50 lg:hidden">
-          <div className="aurora-sidebar h-full w-80 max-w-[85vw] shadow-2xl">
+          <div className="aurora-sidebar mobile-sidebar-panel h-full w-80 max-w-[88vw] shadow-2xl">
             <SidebarContent
               logout={logout}
               closeMobile={() => setMobileOpen(false)}
@@ -169,7 +169,7 @@ function AppLayout() {
       <main className="relative min-w-0 lg:pl-72">
         <Topbar user={user} />
 
-        <div className="app-page-scroll min-h-[calc(100vh-81px)] overflow-x-auto p-4 md:p-6 lg:p-7">
+        <div className="app-page-scroll min-h-[calc(100dvh-81px)] max-w-full overflow-x-hidden p-4 md:p-6 lg:p-7">
           <Outlet />
         </div>
       </main>
@@ -196,7 +196,7 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
       <div className="flex items-start justify-between border-b border-white/5 px-6 py-6">
         <div className="flex items-center gap-3">
           <div className="aurora-logo-ring flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-            <img src="/logo.jpg" alt="White Account Logo" className="h-full w-full object-cover" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="White Account Logo" className="h-full w-full object-cover" />
           </div>
 
           <div>

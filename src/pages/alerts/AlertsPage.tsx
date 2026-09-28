@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { AlertTriangle, Bell, Calendar, Mail, PlayCircle, Search } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Loader2, Mail, Search, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import api from "@/api/api";
@@ -95,7 +95,7 @@ export default function AlertsPage() {
   const [days, setDays] = useState(15);
   const [scope, setScope] = useState<AlertScope>("upcoming");
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -103,7 +103,6 @@ export default function AlertsPage() {
     try {
       setLoading(true);
       setError("");
-      setSuccess("");
 
       const response = await api.get<AlertResponse>("/alerts/subscriptions", {
         params: { days, scope },
@@ -121,19 +120,19 @@ export default function AlertsPage() {
     return () => window.clearTimeout(timeoutId);
   }, [loadAlerts]);
 
-  async function handleRunJobs() {
+  async function handleSendAlert(alert: SubscriptionAlert) {
     try {
-      setRunning(true);
+      setSendingId(alert.id);
       setError("");
       setSuccess("");
 
-      const response = await api.post("/alerts/subscriptions/run");
-      setSuccess(response.data.message || "Job d'alertes email exécuté avec succès.");
+      const response = await api.post(`/alerts/subscriptions/${alert.id}/send`);
+      setSuccess(response.data.message || `Alerte envoyée à ${alert.client_name}.`);
       await loadAlerts();
     } catch (error) {
-      setError(getErrorMessage(error, "Erreur lors de l'exécution du script d'alertes."));
+      setError(getErrorMessage(error, `Impossible d’envoyer l’alerte à ${alert.client_name}.`));
     } finally {
-      setRunning(false);
+      setSendingId(null);
     }
   }
 
@@ -171,14 +170,9 @@ export default function AlertsPage() {
               </p>
             </div>
 
-            <Button
-              onClick={handleRunJobs}
-              disabled={running}
-              className="gap-2 bg-slate-900 hover:bg-slate-800"
-            >
-              {running ? <Bell className="animate-spin" size={18} /> : <PlayCircle size={18} />}
-              Lancer les alertes email
-            </Button>
+            <div className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-800">
+              Envoyez le rappel depuis la ligne du client concerné.
+            </div>
           </div>
         </div>
       </div>
@@ -249,12 +243,13 @@ export default function AlertsPage() {
                 <th className="px-6 py-4">Prochaine Échéance</th>
                 <th className="px-6 py-4">Statut Alerte</th>
                 <th className="px-6 py-4">Emails envoyés</th>
+                <th className="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     <div className="flex justify-center mb-2">
                       <Bell className="animate-bounce text-slate-300" size={24} />
                     </div>
@@ -263,7 +258,7 @@ export default function AlertsPage() {
                 </tr>
               ) : filteredAlerts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     <div className="flex justify-center mb-2">
                       <Calendar className="text-slate-300" size={32} />
                     </div>
@@ -313,6 +308,28 @@ export default function AlertsPage() {
                           <span>J-3: {alert.subscription_alert_3_sent_at ? formatDate(alert.subscription_alert_3_sent_at) : "Non"}</span>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleSendAlert(alert)}
+                        disabled={sendingId === alert.id || !alert.client_email}
+                        title={alert.client_email ? `Envoyer à ${alert.client_email}` : "Ajoutez d’abord l’email du client"}
+                        className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        {sendingId === alert.id ? (
+                          <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                          <Send size={15} />
+                        )}
+                        {alert.subscription_alert_7_sent_at || alert.subscription_alert_3_sent_at
+                          ? "Renvoyer"
+                          : "Alerter"}
+                      </Button>
+                      {!alert.client_email && (
+                        <p className="mt-1 text-xs text-orange-600">Email manquant</p>
+                      )}
                     </td>
                   </tr>
                 ))

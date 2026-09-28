@@ -938,9 +938,9 @@ function PaymentModal({
   const selectedSale = sales.find((sale) => sale.id === formData.sale_id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 sm:items-center sm:p-6">
+      <div className="flex max-h-[calc(100dvh-1rem)] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:rounded-3xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
           <div>
             <h2 className="text-xl font-bold text-slate-950">
               {mode === "edit" ? "Modifier le paiement" : "Nouveau paiement"}
@@ -959,7 +959,7 @@ function PaymentModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4 px-6 py-5">
+        <form onSubmit={onSubmit} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           <FormField label="Facture" required>
             <select
               value={formData.sale_id}
@@ -1050,7 +1050,7 @@ function PaymentModal({
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+          <div className="sticky bottom-0 -mx-4 flex justify-end gap-3 border-t border-slate-100 bg-white px-4 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-4 sm:-mx-6 sm:px-6">
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
               Annuler
             </Button>

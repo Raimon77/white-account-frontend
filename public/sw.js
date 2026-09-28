@@ -1,10 +1,13 @@
-const STATIC_CACHE = "white-account-static-v2";
+const STATIC_CACHE = "white-account-static-v3";
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const APP_SHELL = [
   SCOPE_PATH,
   `${SCOPE_PATH}index.html`,
   `${SCOPE_PATH}manifest.webmanifest`,
   `${SCOPE_PATH}logo.png`,
+  `${SCOPE_PATH}icon-192.png`,
+  `${SCOPE_PATH}icon-512.png`,
+  `${SCOPE_PATH}apple-touch-icon.png`,
   `${SCOPE_PATH}favicon.svg`,
 ];
 

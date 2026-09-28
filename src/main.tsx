@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { isTauri } from '@tauri-apps/api/core'
 import App from './App'
 import './index.css'
 
@@ -21,8 +22,23 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
+if (import.meta.env.PROD && !isTauri() && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+  });
+}
+
+if (isTauri() && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    void navigator.serviceWorker.getRegistrations().then((registrations) =>
+      Promise.all(registrations.map((registration) => registration.unregister()))
+    );
+    void caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key.startsWith("white-account-"))
+          .map((key) => caches.delete(key))
+      )
+    );
   });
 }

@@ -1335,14 +1335,7 @@ function SaleModal({
         >
           <div className="grid gap-3 md:grid-cols-2">
             <FormField label="Client" required>
-              <div
-                className="relative"
-                onBlur={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                    setClientResultsOpen(false);
-                  }
-                }}
-              >
+              <div className="relative">
                 <Search className="absolute left-3 top-3 text-slate-400" size={17} />
                 <input
                   value={clientSearch}
@@ -1379,6 +1372,12 @@ function SaleModal({
                       <button
                         key={client.id}
                         type="button"
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          onChange("client_id", client.id);
+                          setClientSearch(client.name);
+                          setClientResultsOpen(false);
+                        }}
                         onClick={() => {
                           onChange("client_id", client.id);
                           setClientSearch(client.name);

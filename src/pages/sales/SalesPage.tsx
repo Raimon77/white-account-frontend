@@ -114,6 +114,14 @@ type SaleFormData = {
   items: SaleLine[];
 };
 
+type SubscriptionSuggestion = {
+  has_history: boolean;
+  last_subscription_date?: string | null;
+  suggested_next_subscription_date?: string | null;
+  duration_months?: number | null;
+  subscription_label?: string | null;
+};
+
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -317,6 +325,8 @@ function SalesPage() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [subscriptionSuggestionLoading, setSubscriptionSuggestionLoading] = useState(false);
+  const [subscriptionSuggestionNote, setSubscriptionSuggestionNote] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -418,6 +428,72 @@ function SalesPage() {
   }, [formData.items, products]);
 
   const formBalance = Math.max(formTotal - Number(formData.amount_paid || 0), 0);
+  const primaryProductId = formData.items[0]?.product_id || "";
+
+  useEffect(() => {
+    if (!modalOpen || editingSale || !formData.client_id || !primaryProductId) {
+      setSubscriptionSuggestionLoading(false);
+      setSubscriptionSuggestionNote("");
+      return;
+    }
+
+    const selectedProduct = products.find((product) => product.id === primaryProductId);
+    const controller = new AbortController();
+
+    setSubscriptionSuggestionLoading(true);
+    setSubscriptionSuggestionNote("Recherche de la dernière échéance...");
+    setFormData((previous) => ({
+      ...previous,
+      subscription_label: selectedProduct?.name || previous.subscription_label,
+      next_subscription_date: "",
+    }));
+
+    api.get<SubscriptionSuggestion>("/sales/subscription-suggestion", {
+      params: {
+        client_id: formData.client_id,
+        product_id: primaryProductId,
+      },
+      signal: controller.signal,
+    }).then((response) => {
+      const suggestion = response.data;
+
+      if (suggestion.has_history && suggestion.suggested_next_subscription_date) {
+        setFormData((previous) => {
+          if (
+            previous.client_id !== formData.client_id ||
+            previous.items[0]?.product_id !== primaryProductId
+          ) {
+            return previous;
+          }
+
+          return {
+            ...previous,
+            subscription_label:
+              selectedProduct?.name || suggestion.subscription_label || previous.subscription_label,
+            next_subscription_date: suggestion.suggested_next_subscription_date || "",
+          };
+        });
+        setSubscriptionSuggestionNote(
+          `Dernière échéance : ${formatDate(suggestion.last_subscription_date)}. ` +
+          `Prochaine date proposée automatiquement (+${suggestion.duration_months || 1} mois).`
+        );
+      } else {
+        setSubscriptionSuggestionNote(
+          "Aucun ancien abonnement identique trouvé. Saisissez la première échéance manuellement."
+        );
+      }
+    }).catch((error) => {
+      if (!axios.isCancel(error)) {
+        setSubscriptionSuggestionNote(
+          "La date automatique n’a pas pu être calculée. Vous pouvez la saisir manuellement."
+        );
+      }
+    }).finally(() => {
+      if (!controller.signal.aborted) setSubscriptionSuggestionLoading(false);
+    });
+
+    return () => controller.abort();
+  }, [modalOpen, editingSale, formData.client_id, primaryProductId, products]);
 
   function openCreateModal() {
     setEditingSale(null);
@@ -432,6 +508,7 @@ function SalesPage() {
         },
       ],
     });
+    setSubscriptionSuggestionNote("");
     setModalOpen(true);
   }
 
@@ -500,6 +577,7 @@ function SalesPage() {
     setModalOpen(false);
     setEditingSale(null);
     setFormData(emptyForm);
+    setSubscriptionSuggestionNote("");
   }
 
   function closeDetailsModal() {
@@ -1094,6 +1172,8 @@ function SalesPage() {
           formProfit={formProfit}
           formBalance={formBalance}
           saving={saving}
+          subscriptionSuggestionLoading={subscriptionSuggestionLoading}
+          subscriptionSuggestionNote={subscriptionSuggestionNote}
           onClose={closeModal}
           onSubmit={handleSubmit}
           onChange={updateForm}
@@ -1253,6 +1333,8 @@ type SaleModalProps = {
   formProfit: number;
   formBalance: number;
   saving: boolean;
+  subscriptionSuggestionLoading: boolean;
+  subscriptionSuggestionNote: string;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onChange: (field: keyof SaleFormData, value: string) => void;
@@ -1270,6 +1352,8 @@ function SaleModal({
   formProfit,
   formBalance,
   saving,
+  subscriptionSuggestionLoading,
+  subscriptionSuggestionNote,
   onClose,
   onSubmit,
   onChange,
@@ -1470,6 +1554,12 @@ function SaleModal({
                 }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
+              {subscriptionSuggestionNote && (
+                <p className={`text-xs ${subscriptionSuggestionLoading ? "text-blue-600" : "text-slate-500"}`}>
+                  {subscriptionSuggestionLoading && <Loader2 size={12} className="mr-1 inline animate-spin" />}
+                  {subscriptionSuggestionNote}
+                </p>
+              )}
             </FormField>
           </div>
 

@@ -2,7 +2,7 @@
 
 White Account est une application de gestion commerciale conçue pour les petites entreprises qui vendent des produits ou des abonnements récurrents. Elle réunit les ventes, les achats, les paiements, les documents commerciaux, le stock et le suivi des renouvellements dans une application Windows simple à utiliser.
 
-La version actuelle du client est **0.4.24**.
+La version actuelle du client est **0.4.25**.
 
 ## Fonctionnalités
 

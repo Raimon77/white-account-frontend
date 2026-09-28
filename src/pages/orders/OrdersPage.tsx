@@ -963,7 +963,7 @@ function OrdersPage() {
 
       {/* Details Modal */}
       {detailsModalOpen && selectedDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-2xl border bg-white p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
@@ -1150,7 +1150,7 @@ function OrdersPage() {
 
       {/* Convert Modal */}
       {convertModalOpen && convertingOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleConvertSubmit}
             className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl space-y-4"
@@ -1299,7 +1299,7 @@ function OrdersPage() {
 
       {/* Add / Edit Form Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleSubmitForm}
             className="w-full max-w-3xl rounded-2xl border bg-white p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto"

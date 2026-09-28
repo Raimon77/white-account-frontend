@@ -976,7 +976,7 @@ function QuotesPage() {
 
       {/* Details Modal */}
       {detailsModalOpen && selectedDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-2xl border bg-white p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
@@ -1153,7 +1153,7 @@ function QuotesPage() {
 
       {/* Convert Modal */}
       {convertModalOpen && convertingQuote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleConvertSubmit}
             className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl space-y-4"
@@ -1302,7 +1302,7 @@ function QuotesPage() {
 
       {/* Add / Edit Form Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-sm sm:p-6 lg:p-10">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-sm sm:p-6 lg:p-10">
           <form
             onSubmit={handleSubmitForm}
             className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl space-y-3 overflow-y-auto rounded-2xl border bg-white p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:p-5"

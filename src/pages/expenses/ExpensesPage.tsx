@@ -619,7 +619,7 @@ function ExpensesPage() {
 
       {/* Form Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="pwa-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleSubmitForm}
             className="w-full max-w-lg rounded-2xl border bg-white p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"

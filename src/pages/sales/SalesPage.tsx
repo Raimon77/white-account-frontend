@@ -458,6 +458,8 @@ function SalesPage() {
     const calculatedDate = addCalendarMonths(baseDate, subscriptionDurationMonths);
     if (!calculatedDate) return;
 
+    // Recalcule l'échéance quand la durée mensuelle change dans le formulaire.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData((previous) =>
       previous.next_subscription_date === calculatedDate
         ? previous
@@ -473,6 +475,8 @@ function SalesPage() {
 
   useEffect(() => {
     if (!modalOpen || editingSale || !formData.client_id || !primaryProductId) {
+      // Réinitialise l'aide lorsque le formulaire n'a pas assez d'informations.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSubscriptionSuggestionLoading(false);
       setSubscriptionSuggestionNote("");
       if (!editingSale) setSubscriptionBaseDate(null);

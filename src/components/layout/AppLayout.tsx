@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useMemo, useState, type ElementType } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3,
   Bell,
   Boxes,
-  CalendarDays,
-  ChevronDown,
+  ChevronRight,
   ClipboardList,
   CreditCard,
   FileText,
@@ -14,97 +13,62 @@ import {
   LogOut,
   Menu,
   Package,
+  Plus,
   Receipt,
   RefreshCcw,
+  Search,
   Settings,
-  Store,
   Truck,
   Users,
   Wallet,
   X,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { clearAuthSession } from "@/auth/session";
+import { Button } from "@/components/ui/button";
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    path: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Clients",
-    path: "/clients",
-    icon: Users,
-  },
-  {
-    title: "Fournisseurs",
-    path: "/suppliers",
-    icon: Truck,
-  },
-  {
-    title: "Produits",
-    path: "/products",
-    icon: Package,
-  },
-  {
-    title: "Accès aux comptes",
-    path: "/account-access",
-    icon: KeyRound,
-  },
-  {
-    title: "Ventes",
-    path: "/sales",
-    icon: Receipt,
-  },
-  {
-    title: "Paiements",
-    path: "/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "Devis",
-    path: "/quotes",
-    icon: FileText,
-  },
-  {
-    title: "Bons de commande",
-    path: "/orders",
-    icon: ClipboardList,
-  },
-  {
-    title: "Avoirs",
-    path: "/refunds",
-    icon: RefreshCcw,
-  },
-  {
-    title: "Dépenses",
-    path: "/expenses",
-    icon: Wallet,
-  },
-  {
-    title: "Clôtures",
-    path: "/closings",
-    icon: BarChart3,
-  },
-  {
-    title: "Alertes",
-    path: "/alerts",
-    icon: Bell,
-  },
-  {
-    title: "Paramètres",
-    path: "/settings",
-    icon: Settings,
-  },
+type MenuItem = {
+  title: string;
+  path: string;
+  icon: ElementType;
+  group: "Général" | "Catalogue" | "Commercial" | "Pilotage";
+};
+
+const menuItems: MenuItem[] = [
+  { title: "Tableau de bord", path: "/dashboard", icon: Home, group: "Général" },
+  { title: "Clients", path: "/clients", icon: Users, group: "Général" },
+  { title: "Fournisseurs", path: "/suppliers", icon: Truck, group: "Catalogue" },
+  { title: "Produits", path: "/products", icon: Package, group: "Catalogue" },
+  { title: "Comptes et profils", path: "/account-access", icon: KeyRound, group: "Catalogue" },
+  { title: "Ventes", path: "/sales", icon: Receipt, group: "Commercial" },
+  { title: "Paiements", path: "/payments", icon: CreditCard, group: "Commercial" },
+  { title: "Devis", path: "/quotes", icon: FileText, group: "Commercial" },
+  { title: "Bons de commande", path: "/orders", icon: ClipboardList, group: "Commercial" },
+  { title: "Avoirs", path: "/refunds", icon: RefreshCcw, group: "Commercial" },
+  { title: "Dépenses", path: "/expenses", icon: Wallet, group: "Pilotage" },
+  { title: "Clôtures", path: "/closings", icon: BarChart3, group: "Pilotage" },
+  { title: "Alertes", path: "/alerts", icon: Bell, group: "Pilotage" },
+  { title: "Paramètres", path: "/settings", icon: Settings, group: "Pilotage" },
 ];
+
+const railItems = menuItems.filter((item) =>
+  ["/dashboard", "/sales", "/clients", "/account-access", "/alerts"].includes(item.path)
+);
+
+const groups: MenuItem["group"][] = ["Général", "Catalogue", "Commercial", "Pilotage"];
+
+type UserType = {
+  full_name?: string;
+  email?: string;
+  role?: string;
+} | null;
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const user = useMemo(() => {
+  const user = useMemo<UserType>(() => {
     try {
       const userRaw = localStorage.getItem("white_account_user");
       return userRaw ? JSON.parse(userRaw) : null;
@@ -113,171 +77,200 @@ function AppLayout() {
     }
   }, []);
 
+  const currentItem =
+    menuItems.find((item) => location.pathname.startsWith(item.path)) || menuItems[0];
+
   function logout() {
     clearAuthSession();
     navigate("/login");
   }
 
   return (
-    <div className="aurora-app-shell relative min-h-[100dvh] overflow-x-hidden text-slate-950">
-      <div className="aurora-app-glow aurora-app-glow-blue" aria-hidden="true" />
-      <div className="aurora-app-glow aurora-app-glow-orange" aria-hidden="true" />
+    <div className="teams-app-shell min-h-[100dvh] text-slate-950">
+      <MobileHeader
+        title={currentItem.title}
+        onOpen={() => setMobileOpen(true)}
+        onNewSale={() => navigate("/sales")}
+      />
 
-      {/* Topbar mobile */}
-      <div className="aurora-topbar sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur-xl lg:hidden">
-        <div className="flex items-center gap-3">
-          <div className="aurora-brand-mark flex h-10 w-10 items-center justify-center rounded-2xl text-white">
-            <Boxes size={22} />
-          </div>
-
-          <div>
-            <h1 className="text-base font-bold text-slate-950">
-              White Account
-            </h1>
-            <p className="text-xs text-slate-500">Gestion commerciale</p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="rounded-xl border border-blue-100 bg-white/85 p-2 text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
-        >
-          <Menu size={20} />
-        </button>
-      </div>
-
-      {/* Overlay mobile */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/50 lg:hidden">
-          <div className="aurora-sidebar mobile-sidebar-panel h-full w-80 max-w-[88vw] shadow-2xl">
-            <SidebarContent
+        <div className="teams-mobile-overlay fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Fermer le menu"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="teams-mobile-panel relative h-full w-[min(86vw,320px)] bg-white shadow-2xl">
+            <SectionNavigation
+              user={user}
               logout={logout}
               closeMobile={() => setMobileOpen(false)}
-              user={user}
             />
-          </div>
+          </aside>
         </div>
       )}
 
-      {/* Sidebar desktop */}
-      <aside className="aurora-sidebar fixed left-0 top-0 z-40 hidden h-screen w-72 text-white shadow-2xl lg:block">
-        <SidebarContent logout={logout} user={user} />
+      <aside className="teams-rail fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col text-white lg:flex">
+        <button
+          type="button"
+          aria-label="White Account"
+          onClick={() => navigate("/dashboard")}
+          className="teams-rail-logo mx-auto mt-3 flex h-11 w-11 items-center justify-center rounded-[10px]"
+        >
+          <Boxes size={23} />
+        </button>
+
+        <nav className="mt-4 flex flex-1 flex-col items-center gap-1 px-2" aria-label="Navigation rapide">
+          {railItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `teams-rail-link flex w-full flex-col items-center justify-center gap-1 rounded-lg py-2 text-[10px] ${
+                    isActive ? "is-active" : ""
+                  }`
+                }
+              >
+                <Icon size={19} />
+                <span className="max-w-full truncate">{item.title === "Comptes et profils" ? "Comptes" : item.title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        <button
+          type="button"
+          onClick={logout}
+          className="teams-rail-link mx-2 mb-3 flex flex-col items-center gap-1 rounded-lg py-2 text-[10px]"
+        >
+          <LogOut size={19} />
+          Quitter
+        </button>
       </aside>
 
-      {/* Main */}
-      <main className="relative min-w-0 lg:pl-72">
-        <Topbar user={user} />
+      <aside className="teams-section-nav fixed inset-y-0 left-[72px] z-30 hidden w-[236px] border-r border-[#e5e5eb] bg-white lg:block">
+        <SectionNavigation user={user} logout={logout} />
+      </aside>
 
-        <div className="app-page-scroll min-h-[calc(100dvh-81px)] max-w-full overflow-x-hidden p-4 md:p-6 lg:p-7">
+      <div className="min-w-0 lg:pl-[308px]">
+        <DesktopTopbar user={user} currentItem={currentItem} />
+        <main className="teams-content app-page-scroll min-h-[calc(100dvh-52px)] min-w-0 overflow-x-hidden p-3 sm:p-4 lg:p-5">
           <Outlet />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
 
-type UserType = {
-  full_name?: string;
-  email?: string;
-  role?: string;
-} | null;
+function MobileHeader({
+  title,
+  onOpen,
+  onNewSale,
+}: {
+  title: string;
+  onOpen: () => void;
+  onNewSale: () => void;
+}) {
+  return (
+    <header className="teams-mobile-header sticky top-0 z-30 flex items-center justify-between border-b px-3 py-2 lg:hidden">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <button type="button" onClick={onOpen} className="teams-icon-button" aria-label="Ouvrir le menu">
+          <Menu size={20} />
+        </button>
+        <div className="teams-mobile-brand flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white">
+          <Boxes size={18} />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-900">{title}</p>
+          <p className="text-[11px] text-slate-500">White Account</p>
+        </div>
+      </div>
+      <Button type="button" onClick={onNewSale} className="gap-1.5">
+        <Plus size={16} />
+        Vente
+      </Button>
+    </header>
+  );
+}
 
-type SidebarContentProps = {
+function SectionNavigation({
+  user,
+  logout,
+  closeMobile,
+}: {
+  user?: UserType;
   logout: () => void;
   closeMobile?: () => void;
-  user?: UserType;
-};
-
-function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
+}) {
   return (
-    <div className="relative flex h-full flex-col overflow-hidden">
-      <div className="aurora-sidebar-glow" aria-hidden="true" />
-      <div className="flex items-start justify-between border-b border-white/5 px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="aurora-logo-ring flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="White Account Logo" className="h-full w-full object-cover" />
-          </div>
-
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-white">
-              WHITE ACCOUNT
-            </h1>
-            <p className="text-xs text-slate-300">Gestion commerciale</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-blue-300">
-              <span className="aurora-live-dot h-1.5 w-1.5 rounded-full bg-blue-400" />
-              Espace actif
-            </div>
+    <div className="flex h-full flex-col">
+      <div className="flex h-[58px] items-center justify-between border-b border-[#ededf2] px-4">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <img
+            src={`${import.meta.env.BASE_URL}logo.jpg`}
+            alt=""
+            className="h-8 w-8 rounded-lg object-cover"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-[#242424]">White Account</p>
+            <p className="text-[11px] text-[#616161]">Gestion commerciale</p>
           </div>
         </div>
-
         {closeMobile && (
-          <button
-            type="button"
-            onClick={closeMobile}
-            className="rounded-lg border border-white/10 p-2 text-white lg:hidden"
-          >
+          <button type="button" onClick={closeMobile} className="teams-icon-button" aria-label="Fermer le menu">
             <X size={18} />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 py-6 scrollbar-hide">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={closeMobile}
-              className={({ isActive }) =>
-                `aurora-nav-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "is-active bg-blue-500/15 text-blue-300"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
-                }`
-              }
-            >
-              <Icon size={18} className={`transition-colors ${
-                window.location.pathname.startsWith(item.path) 
-                  ? "text-blue-300"
-                  : "text-slate-500 group-hover:text-slate-300"
-              }`} />
-              <span>{item.title}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      <div className="space-y-3 border-t border-white/5 p-5">
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-3 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-orange-400 text-sm font-bold text-white shadow-lg shadow-blue-950/20">
-              {(user?.full_name || "AD").slice(0, 2).toUpperCase()}
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-200">
-                {user?.full_name || "Admin User"}
-              </p>
-              <p className="truncate text-xs text-slate-400">
-                {user?.email || "Administrateur White Account"}
-              </p>
+      <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
+        {groups.map((group) => (
+          <div key={group} className="mb-4">
+            <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#77777d]">
+              {group}
+            </p>
+            <div className="space-y-0.5">
+              {menuItems
+                .filter((item) => item.group === group)
+                .map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={closeMobile}
+                      className={({ isActive }) =>
+                        `teams-section-link group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] ${
+                          isActive ? "is-active" : ""
+                        }`
+                      }
+                    >
+                      <Icon size={17} />
+                      <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                      <ChevronRight size={13} className="opacity-0 transition group-hover:opacity-100" />
+                    </NavLink>
+                  );
+                })}
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="mt-3 inline-flex rounded-md bg-white/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-            {user?.role || "admin"}
+      <div className="border-t border-[#ededf2] p-3">
+        <div className="mb-2 flex items-center gap-2.5 rounded-lg bg-[#f7f7fa] p-2.5">
+          <div className="teams-user-avatar flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white">
+            {(user?.full_name || "WA").slice(0, 2).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold text-[#242424]">{user?.full_name || "Administrateur"}</p>
+            <p className="truncate text-[11px] text-[#707077]">{user?.email || user?.role || "White Account"}</p>
           </div>
         </div>
-
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2 border-white/10 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-          onClick={logout}
-        >
-          <LogOut size={18} />
+        <Button type="button" variant="ghost" onClick={logout} className="w-full justify-start gap-2 text-[#616161]">
+          <LogOut size={16} />
           Déconnexion
         </Button>
       </div>
@@ -285,66 +278,71 @@ function SidebarContent({ logout, closeMobile, user }: SidebarContentProps) {
   );
 }
 
-function Topbar({ user }: { user?: UserType }) {
+function DesktopTopbar({ user, currentItem }: { user?: UserType; currentItem: MenuItem }) {
   const navigate = useNavigate();
-  
-  const currentPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const results = menuItems.filter((item) =>
+    item.title.toLowerCase().includes(query.trim().toLowerCase())
+  );
 
   return (
-    <header className="aurora-topbar sticky top-0 z-30 hidden border-b backdrop-blur-xl lg:block">
-      <div className="flex h-20 items-center justify-between px-8">
-        <div className="flex items-center gap-4">
-          <button className="rounded-xl border border-blue-100 bg-white/80 p-2 text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700">
-            <Menu size={20} />
-          </button>
+    <header className="teams-topbar sticky top-0 z-20 hidden h-[52px] items-center gap-4 border-b px-4 lg:flex">
+      <div className="min-w-[150px]">
+        <p className="text-sm font-semibold text-[#242424]">{currentItem.title}</p>
+      </div>
 
-          <div>
-            <h2 className="text-xl font-bold text-slate-950">
-              Bonjour, {user?.full_name || "Admin"} 👋
-            </h2>
-            <p className="text-sm text-slate-500">
-              Voici un aperçu de votre activité commerciale.
-            </p>
+      <div className="relative mx-auto w-full max-w-xl">
+        <Search className="pointer-events-none absolute left-3 top-2.5 text-[#707077]" size={16} />
+        <input
+          value={query}
+          onFocus={() => setFocused(true)}
+          onBlur={() => window.setTimeout(() => setFocused(false), 120)}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Rechercher une page dans White Account"
+          className="teams-global-search h-9 w-full rounded-md border pl-9 pr-3 text-sm outline-none"
+        />
+        {focused && query.trim() && (
+          <div className="absolute inset-x-0 top-10 overflow-hidden rounded-lg border border-[#dedee5] bg-white py-1 shadow-xl">
+            {results.length === 0 ? (
+              <p className="px-3 py-3 text-sm text-[#707077]">Aucune page trouvée.</p>
+            ) : (
+              results.slice(0, 6).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      navigate(item.path);
+                      setQuery("");
+                      setFocused(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-[#f0f0fa]"
+                  >
+                    <Icon size={16} className="text-[#5b5fc7]" />
+                    {item.title}
+                  </button>
+                );
+              })
+            )}
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 rounded-full border border-blue-100 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-white">
-            <CalendarDays size={16} className="text-blue-600" />
-            {currentPeriod}
-            <ChevronDown size={14} className="text-slate-400" />
-          </button>
-
-          <button 
-            onClick={() => navigate('/alerts')}
-            className="group relative rounded-full border border-blue-100 bg-white/70 p-2.5 text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
-          >
-            <Bell size={18} />
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
-              !
-            </span>
-          </button>
-
-          <div className="h-6 w-px bg-slate-200"></div>
-
-          <button 
-            onClick={() => navigate('/settings')}
-            className="flex items-center gap-3 rounded-full border border-blue-100 bg-white/70 py-1.5 pl-2 pr-3 shadow-sm transition hover:border-blue-200 hover:bg-white"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
-              <Store size={16} />
-            </div>
-
-            <div className="text-left">
-              <p className="text-sm font-semibold text-slate-800 leading-tight">
-                Ma Boutique
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Espace principal</p>
-            </div>
-
-            <ChevronDown size={14} className="text-slate-400 ml-1" />
-          </button>
-        </div>
+      <div className="flex min-w-[250px] items-center justify-end gap-2">
+        <Button type="button" onClick={() => navigate("/sales")} className="gap-1.5">
+          <Plus size={16} />
+          Nouvelle vente
+        </Button>
+        <button type="button" onClick={() => navigate("/alerts")} className="teams-icon-button relative" aria-label="Alertes">
+          <Bell size={18} />
+          <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[#d13438]" />
+        </button>
+        <button type="button" onClick={() => navigate("/settings")} className="teams-user-avatar flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white" aria-label="Paramètres du compte">
+          {(user?.full_name || "WA").slice(0, 2).toUpperCase()}
+        </button>
       </div>
     </header>
   );

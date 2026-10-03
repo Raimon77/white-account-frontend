@@ -126,6 +126,25 @@ function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function addCalendarMonths(dateValue: string, months: number) {
+  const [year, month, day] = dateValue.slice(0, 10).split("-").map(Number);
+  if (![year, month, day].every(Number.isFinite)) return "";
+
+  const targetIndex = year * 12 + (month - 1) + months;
+  const targetYear = Math.floor(targetIndex / 12);
+  const targetMonthIndex = ((targetIndex % 12) + 12) % 12;
+  const lastTargetDay = new Date(
+    Date.UTC(targetYear, targetMonthIndex + 1, 0)
+  ).getUTCDate();
+  const targetDay = Math.min(day, lastTargetDay);
+
+  return `${targetYear}-${String(targetMonthIndex + 1).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+}
+
+function getDurationMonths(value: number | string | null | undefined) {
+  return Math.min(24, Math.max(1, Math.trunc(Number(value) || 1)));
+}
+
 const emptyForm: SaleFormData = {
   client_id: "",
   sale_date: getTodayDate(),
@@ -327,6 +346,7 @@ function SalesPage() {
   const [success, setSuccess] = useState("");
   const [subscriptionSuggestionLoading, setSubscriptionSuggestionLoading] = useState(false);
   const [subscriptionSuggestionNote, setSubscriptionSuggestionNote] = useState("");
+  const [subscriptionBaseDate, setSubscriptionBaseDate] = useState<string | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -429,11 +449,33 @@ function SalesPage() {
 
   const formBalance = Math.max(formTotal - Number(formData.amount_paid || 0), 0);
   const primaryProductId = formData.items[0]?.product_id || "";
+  const subscriptionDurationMonths = getDurationMonths(formData.items[0]?.quantity);
+
+  useEffect(() => {
+    if (!modalOpen || !primaryProductId) return;
+
+    const baseDate = subscriptionBaseDate || formData.sale_date;
+    const calculatedDate = addCalendarMonths(baseDate, subscriptionDurationMonths);
+    if (!calculatedDate) return;
+
+    setFormData((previous) =>
+      previous.next_subscription_date === calculatedDate
+        ? previous
+        : { ...previous, next_subscription_date: calculatedDate }
+    );
+  }, [
+    modalOpen,
+    primaryProductId,
+    formData.sale_date,
+    subscriptionBaseDate,
+    subscriptionDurationMonths,
+  ]);
 
   useEffect(() => {
     if (!modalOpen || editingSale || !formData.client_id || !primaryProductId) {
       setSubscriptionSuggestionLoading(false);
       setSubscriptionSuggestionNote("");
+      if (!editingSale) setSubscriptionBaseDate(null);
       return;
     }
 
@@ -442,10 +484,14 @@ function SalesPage() {
 
     setSubscriptionSuggestionLoading(true);
     setSubscriptionSuggestionNote("Recherche de la dernière échéance...");
+    setSubscriptionBaseDate(null);
     setFormData((previous) => ({
       ...previous,
       subscription_label: selectedProduct?.name || previous.subscription_label,
-      next_subscription_date: "",
+      next_subscription_date: addCalendarMonths(
+        previous.sale_date,
+        getDurationMonths(previous.items[0]?.quantity)
+      ),
     }));
 
     api.get<SubscriptionSuggestion>("/sales/subscription-suggestion", {
@@ -458,6 +504,7 @@ function SalesPage() {
       const suggestion = response.data;
 
       if (suggestion.has_history && suggestion.suggested_next_subscription_date) {
+        setSubscriptionBaseDate(suggestion.last_subscription_date || null);
         setFormData((previous) => {
           if (
             previous.client_id !== formData.client_id ||
@@ -470,16 +517,19 @@ function SalesPage() {
             ...previous,
             subscription_label:
               selectedProduct?.name || suggestion.subscription_label || previous.subscription_label,
-            next_subscription_date: suggestion.suggested_next_subscription_date || "",
+            next_subscription_date: addCalendarMonths(
+              suggestion.last_subscription_date || previous.sale_date,
+              getDurationMonths(previous.items[0]?.quantity)
+            ),
           };
         });
         setSubscriptionSuggestionNote(
           `Dernière échéance : ${formatDate(suggestion.last_subscription_date)}. ` +
-          `Prochaine date proposée automatiquement (+${suggestion.duration_months || 1} mois).`
+          "Nouvelle échéance recalculée selon le nombre de mois."
         );
       } else {
         setSubscriptionSuggestionNote(
-          "Aucun ancien abonnement identique trouvé. Saisissez la première échéance manuellement."
+          "Premier abonnement : échéance calculée depuis la date de vente."
         );
       }
     }).catch((error) => {
@@ -509,6 +559,7 @@ function SalesPage() {
       ],
     });
     setSubscriptionSuggestionNote("");
+    setSubscriptionBaseDate(null);
     setModalOpen(true);
   }
 
@@ -521,6 +572,15 @@ function SalesPage() {
       const details = response.data;
 
       setEditingSale(details.sale);
+      const firstItemMonths = getDurationMonths(details.items[0]?.quantity);
+      const existingNextDate = details.sale.next_subscription_date
+        ? details.sale.next_subscription_date.slice(0, 10)
+        : "";
+      setSubscriptionBaseDate(
+        existingNextDate
+          ? addCalendarMonths(existingNextDate, -firstItemMonths)
+          : (details.sale.sale_date || getTodayDate()).slice(0, 10)
+      );
       setFormData({
         client_id: details.sale.client_id || "",
         sale_date: (details.sale.sale_date || getTodayDate()).slice(0, 10),
@@ -578,6 +638,7 @@ function SalesPage() {
     setEditingSale(null);
     setFormData(emptyForm);
     setSubscriptionSuggestionNote("");
+    setSubscriptionBaseDate(null);
   }
 
   function closeDetailsModal() {
@@ -676,7 +737,7 @@ function SalesPage() {
         next_subscription_date: formData.next_subscription_date || null,
         items: validItems.map((item) => ({
           product_id: item.product_id,
-          quantity: Number(item.quantity || 0),
+          quantity: getDurationMonths(item.quantity),
 
           // Prix réellement appliqué à la vente.
           // Il peut être différent du prix par défaut du produit.
@@ -1545,7 +1606,7 @@ function SaleModal({
               />
             </FormField>
 
-            <FormField label="Prochaine date abonnement">
+            <FormField label="Date d’échéance">
               <input
                 type="date"
                 value={formData.next_subscription_date}
@@ -1578,10 +1639,10 @@ function SaleModal({
           <div className="mt-4 rounded-2xl border border-slate-200">
             <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-bold text-slate-950">Produits vendus</p>
+                <p className="font-bold text-slate-950">Abonnements vendus</p>
                 <p className="text-sm text-slate-500">
-                  Le prix par défaut est rempli automatiquement, mais reste
-                  modifiable.
+                  Indiquez le nombre de mois. Le prix mensuel, le total et la
+                  date d’échéance se calculent automatiquement.
                 </p>
               </div>
 
@@ -1635,9 +1696,12 @@ function SaleModal({
                     </FormField>
 
                     <NumberField
-                      label="Qté"
+                      label="Mois"
                       value={item.quantity}
                       onChange={(value) => onLineChange(index, "quantity", value)}
+                      min={1}
+                      max={24}
+                      step={1}
                     />
 
                     <NumberField
@@ -1781,7 +1845,7 @@ function SaleDetailsModal({
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Produit</th>
-                  <th className="px-4 py-3 text-right">Quantité</th>
+                  <th className="px-4 py-3 text-right">Mois</th>
                   <th className="px-4 py-3 text-right">Prix vente</th>
                   <th className="px-4 py-3 text-right">Coût achat</th>
                   <th className="px-4 py-3 text-right">Total</th>
@@ -1905,16 +1969,24 @@ function NumberField({
   label,
   value,
   onChange,
+  min = 0,
+  max,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
 }) {
   return (
     <FormField label={label} small>
       <input
         type="number"
-        min="0"
+        min={min}
+        max={max}
+        step={step}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"

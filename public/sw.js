@@ -1,4 +1,4 @@
-const STATIC_CACHE = "white-account-static-v3";
+const STATIC_CACHE = "white-account-static-v4";
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const APP_SHELL = [
   SCOPE_PATH,

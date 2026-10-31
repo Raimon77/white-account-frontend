@@ -727,6 +727,11 @@ function SalesPage() {
       return;
     }
 
+    if (editingSale && Number(formData.amount_paid || 0) < toNumber(editingSale.amount_paid) &&
+        !window.confirm("Réduire le montant payé corrigera les paiements les plus récents : certains seront diminués ou supprimés. Confirmer ?")) {
+      return;
+    }
+
     try {
       setSaving(true);
       setError("");
@@ -1591,10 +1596,11 @@ function SaleModal({
 
           {mode === "edit" && (
             <div className="mt-3 rounded-xl bg-orange-50 p-3 text-sm text-orange-800">
-              Si la vente possède déjà des paiements liés, la modification de la
-              vente recalcule le solde selon les paiements existants. La
-              correction détaillée des paiements se fera dans le module
-              Paiements.
+              Le montant payé correspond au total encaissé pour cette vente.
+              Une augmentation ajoute uniquement la différence. Une diminution
+              corrige les paiements les plus récents. Le solde est recalculé
+              automatiquement. Pour corriger une date ou un mode de paiement
+              existant, utilisez le module Paiements.
             </div>
           )}
 

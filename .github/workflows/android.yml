@@ -46,6 +46,8 @@ jobs:
         run: npm run release:check && npm run security:check && npm run android:check
       - name: Generate Android project
         run: bash scripts/android-ci.sh npm run tauri -- android init --ci --skip-targets-install
+      - name: Apply White Account launcher icons
+        run: npm run android:icons
       - name: Build installable ARM64 test APK
         run: bash scripts/android-ci.sh npm run tauri -- android build --debug --apk --target aarch64 --ci
       - name: Verify and collect APK

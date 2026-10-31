@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "android:check": "node scripts/validate-android-config.mjs",
-    "android:init": "tauri android init --ci",
+    "android:init": "tauri android init --ci && npm run android:icons",
+    "android:icons": "node scripts/apply-android-icons.mjs",
     "android:build": "tauri android build --apk --target aarch64"
   },
   "dependencies": {

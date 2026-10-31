@@ -178,6 +178,10 @@ VITE_API_URL=https://white-account-backend.onrender.com/api npm run tauri -- and
 ```
 
 Le projet Gradle est généré par le CLI verrouillé dans `src-tauri/gen/android`.
+`npm run android:init` applique ensuite les icônes White Account existantes dans
+`src-tauri/icons/android`. Si vous utilisez directement `tauri android init`,
+exécutez `npm run android:icons` après la génération pour remplacer l'icône Tauri
+du modèle Android. Le workflow effectue aussi cette étape avant compilation.
 L'APK est produit dans `src-tauri/gen/android/app/build/outputs/apk`.
 Les mises à jour Windows et l'instance unique restent réservées au PC.
 Les reçus et factures s'ouvrent avec l'application externe disponible sur Android.

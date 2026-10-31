@@ -145,3 +145,49 @@ Le serveur API est maintenu dans le dépôt [`white-account-backend`](https://gi
 ## Statut
 
 White Account est en développement actif. Toute modification des ventes, achats ou paiements doit préserver la cohérence du stock, des soldes, du tableau de bord et des clôtures mensuelles.
+
+## Application Android native (premier APK de test)
+
+La branche `android-native` ajoute un client Tauri 2 pour Android 7.0/API 24 et
+versions ultérieures. Le premier APK cible les téléphones ARM64 (`arm64-v8a`).
+Il utilise la même API HTTPS et les mêmes comptes que les autres clients ;
+une connexion Internet reste nécessaire.
+
+Le workflow **Android test APK** compile un APK signé avec une clé de débogage,
+vérifie sa signature et conserve l'APK avec son empreinte SHA-256 dans l'artefact
+`White-Account-Android-arm64-test` pendant 30 jours. Télécharger l'artefact de
+l'exécution GitHub Actions, extraire le ZIP puis installer le fichier `.apk`
+sur le téléphone (autoriser l'installation depuis cette source si Android le demande).
+L'identifiant de test est `com.whiteaccount.mobile.debug`, distinct de la PWA.
+Ce paquet sert aux essais ; il ne constitue pas une publication Google Play.
+La clé de débogage du runner peut changer entre les compilations : une nouvelle
+version de test peut nécessiter une désinstallation, qui efface la session locale.
+Les données métier restent sur le backend.
+
+Pour une compilation locale, installer Node 22, Rust stable, Java 21 et les
+outils Android SDK. La version verrouillée du CLI utilise Android SDK 36,
+Build Tools 36.0.0 et le workflow sélectionne NDK 27.2.12479018.
+Définir `JAVA_HOME`, `ANDROID_HOME` et `NDK_HOME`, puis :
+
+```bash
+npm ci
+rustup target add aarch64-linux-android
+npm run android:init
+npm run android:check
+VITE_API_URL=https://white-account-backend.onrender.com/api npm run tauri -- android build --debug --apk --target aarch64 --ci
+```
+
+Le projet Gradle est généré par le CLI verrouillé dans `src-tauri/gen/android`.
+`npm run android:init` applique ensuite les icônes White Account existantes dans
+`src-tauri/icons/android`. Si vous utilisez directement `tauri android init`,
+exécutez `npm run android:icons` après la génération pour remplacer l'icône Tauri
+du modèle Android. Le workflow effectue aussi cette étape avant compilation.
+L'APK est produit dans `src-tauri/gen/android/app/build/outputs/apk`.
+Les mises à jour Windows et l'instance unique restent réservées au PC.
+Les reçus et factures s'ouvrent avec l'application externe disponible sur Android.
+
+Avant une distribution stable, créer et conserver une clé Android dédiée hors
+Git, configurer la signature Gradle via des secrets et produire une version
+`release` (APK pour distribution directe ou AAB pour Google Play). Ne jamais
+utiliser la clé de test pour la distribution stable. Tester sur téléphone la
+connexion, les corrections de paiements et l'ouverture des PDF avant publication.

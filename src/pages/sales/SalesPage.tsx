@@ -818,7 +818,7 @@ function SalesPage() {
         );
       }
 
-      open(buildBackendFileUrl(downloadUrl));
+      await open(buildBackendFileUrl(downloadUrl));
       await loadData();
     } catch (error) {
       setError(getErrorMessage(error, "Impossible de générer la facture PDF."));

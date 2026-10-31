@@ -165,8 +165,8 @@ version de test peut nécessiter une désinstallation, qui efface la session loc
 Les données métier restent sur le backend.
 
 Pour une compilation locale, installer Node 22, Rust stable, Java 21 et les
-outils Android SDK. La version verrouillée du CLI utilise Android SDK 37,
-Build Tools 37.0.0 et le workflow sélectionne NDK 27.2.12479018.
+outils Android SDK. La version verrouillée du CLI utilise Android SDK 36,
+Build Tools 36.0.0 et le workflow sélectionne NDK 27.2.12479018.
 Définir `JAVA_HOME`, `ANDROID_HOME` et `NDK_HOME`, puis :
 
 ```bash

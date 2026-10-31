@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { isTauri } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { ask, message } from "@tauri-apps/plugin-dialog";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check } from "@tauri-apps/plugin-updater";
@@ -56,6 +56,7 @@ function UpdateManager() {
     let errorAlreadyShown = false;
 
     async function verifyPreviousInstallation() {
+      if (!(await invoke<boolean>("supports_desktop_updates"))) return;
       const pendingUpdate = readPendingUpdate();
       if (!pendingUpdate) return;
 
@@ -84,6 +85,7 @@ function UpdateManager() {
       checking = true;
 
       try {
+        if (!(await invoke<boolean>("supports_desktop_updates")) || disposed) return;
         const update = await check({ timeout: 20_000 });
 
         if (!update || disposed || promptedVersion === update.version) {

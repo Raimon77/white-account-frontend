@@ -1,0 +1,63 @@
+name: Android test APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [android-native]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_API_URL: https://white-account-backend.onrender.com/api
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Install Android SDK and NDK
+        run: |
+          sdkmanager "platforms;android-37" "build-tools;37.0.0" "ndk;27.2.12479018"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+      - run: npm ci
+      - name: Validate application configuration
+        run: npm run release:check && npm run security:check && npm run android:check
+      - name: Generate Android project
+        run: npm run tauri -- android init --ci --skip-targets-install
+      - name: Build installable ARM64 test APK
+        run: npm run tauri -- android build --debug --apk --target aarch64 --ci
+      - name: Verify and collect APK
+        run: |
+          mkdir -p android-artifacts
+          mapfile -t apks < <(find src-tauri/gen/android/app/build/outputs/apk -type f -name '*.apk')
+          test "${#apks[@]}" -eq 1
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose "${apks[0]}"
+          cp "${apks[0]}" android-artifacts/White-Account-Android-arm64-test.apk
+          sha256sum android-artifacts/*.apk > android-artifacts/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: White-Account-Android-arm64-test
+          path: android-artifacts/
+          if-no-files-found: error
+          retention-days: 30

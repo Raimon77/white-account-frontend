@@ -568,7 +568,7 @@ function OrdersPage() {
       const url = getPdfDownloadUrl(response.data);
 
       if (url) {
-        open(buildBackendFileUrl(url));
+        await open(buildBackendFileUrl(url));
       } else {
         setError("L'URL du PDF n'a pas été retournée par le serveur.");
       }

@@ -1,0 +1,7 @@
+{
+  "identifier": "android",
+  "description": "Android main window and external document opening",
+  "platforms": ["android"],
+  "windows": ["main"],
+  "permissions": ["core:default", "shell:allow-open", "dialog:allow-message"]
+}

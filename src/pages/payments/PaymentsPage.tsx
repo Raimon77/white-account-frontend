@@ -472,7 +472,7 @@ function PaymentsPage() {
         );
       }
 
-      open(buildBackendFileUrl(downloadUrl));
+      await open(buildBackendFileUrl(downloadUrl));
       await loadData();
     } catch (error) {
       setError(getErrorMessage(error, "Impossible de generer le recu PDF."));

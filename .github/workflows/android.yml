@@ -19,6 +19,9 @@ jobs:
     env:
       VITE_API_URL: https://white-account-backend.onrender.com/api
       CARGO_BUILD_JOBS: '2'
+      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      NDK_HOME: ${{ runner.temp }}/android-sdk/ndk/27.2.12479018
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,8 +40,7 @@ jobs:
           workspaces: src-tauri
       - name: Install Android SDK and NDK
         run: |
-          bash scripts/android-ci.sh sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.2.12479018"
-          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+          bash scripts/android-ci.sh bash scripts/setup-android-sdk.sh
       - run: npm ci
       - name: Validate application configuration
         run: npm run release:check && npm run security:check && npm run android:check
